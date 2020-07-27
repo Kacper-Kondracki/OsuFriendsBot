@@ -1,0 +1,10 @@
+﻿[*.cs]
+
+# CA2007: Rozważ wywołanie metody ConfigureAwait w zadaniu, na które się oczekuje
+dotnet_diagnostic.CA2007.severity = silent
+
+# CA1062: Waliduj argumenty metod publicznych
+dotnet_diagnostic.CA1062.severity = silent
+
+# CA1303: Nie przekazuj literałów jako zlokalizowanych parametrów
+dotnet_diagnostic.CA1303.severity = silent

@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendBot", "OsuFriendBot.csproj", "{CA10569F-0C1F-41BA-B4E4-4C90C3E7EE45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{313528E2-6545-400B-B44C-DD83F26A69AD}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA10569F-0C1F-41BA-B4E4-4C90C3E7EE45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA10569F-0C1F-41BA-B4E4-4C90C3E7EE45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA10569F-0C1F-41BA-B4E4-4C90C3E7EE45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA10569F-0C1F-41BA-B4E4-4C90C3E7EE45}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {91767AB7-95FD-4840-8A03-055D246413D4}
+	EndGlobalSection
+EndGlobal
