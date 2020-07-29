@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using LiteDB;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OsuFriendBot.Services;
@@ -46,6 +47,8 @@ namespace OsuFriendBot
                 .AddSingleton<StartupService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
+                .AddSingleton<VerificationService>()
+                .AddSingleton(new LiteDatabase(config.ConnectionString))
                 .AddSingleton<LoggingService>()
                 // Transients
                 // Config
