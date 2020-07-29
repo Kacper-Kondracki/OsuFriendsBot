@@ -3,21 +3,24 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace OsuFriendBot.Services
 {
     public class CommandHandlingService
     {
-        private readonly CommandService _commands;
         private readonly DiscordSocketClient _discord;
-        private readonly IServiceProvider _services;
+        private readonly CommandService _commands;
+        private readonly GuildSettingsCacheService _guildSettings;
         private readonly Config _config;
+        private readonly IServiceProvider _services;
 
-        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, Config config, IServiceProvider services)
+        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, GuildSettingsCacheService guildSettings, Config config, IServiceProvider services)
         {
             _discord = discord;
             _commands = commands;
+            _guildSettings = guildSettings;
             _config = config;
             _services = services;
 
@@ -52,7 +55,8 @@ namespace OsuFriendBot.Services
             // Perform prefix check. You may want to replace this with
             // (!message.HasCharPrefix('!', ref argPos))
             // for a more traditional command format like !help.
-            if (!message.HasStringPrefix(_config.Prefix, ref argPos))
+            var guildId = (message.Channel as SocketGuildChannel)?.Guild?.Id;
+            if (!message.HasStringPrefix(guildId != null ? _guildSettings.GetOrAddGuildSettings(guildId.Value).Prefix ?? _config.Prefix : _config.Prefix, ref argPos))
             {
                 return;
             }

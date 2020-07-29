@@ -1,23 +1,25 @@
 ﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
+using OsuFriendBot.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace OsuFriendBot.Modules
 {
     // Modules must be public and inherit from an IModuleBase
-    [RequireContext(ContextType.Guild)]
-    [Name("Information module")]
+    [Name("Informations")]
     [Summary("Useful informations about me")]
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
+        private readonly GuildSettingsCacheService _guildSettings;
         private readonly CommandService _commands;
         private readonly Config _config;
         private readonly ILogger _logger;
 
-        public InfoModule(CommandService commands, Config config, ILogger<InfoModule> logger)
+        public InfoModule(GuildSettingsCacheService guildSettings, CommandService commands, Config config, ILogger<InfoModule> logger)
         {
+            _guildSettings = guildSettings;
             _commands = commands;
             _config = config;
             _logger = logger;
@@ -40,7 +42,7 @@ namespace OsuFriendBot.Modules
                     {
                         title += $" | {command.Summary}";
                     }
-                    string text = $"{_config.Prefix}{command.Name}";
+                    string text = $"{(Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix)}{command.Name}";
                     foreach (var param in command.Parameters)
                     {
                         text += $" | {param.Name}";
