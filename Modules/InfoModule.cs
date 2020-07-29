@@ -8,6 +8,8 @@ namespace OsuFriendBot.Modules
 {
     // Modules must be public and inherit from an IModuleBase
     [RequireContext(ContextType.Guild)]
+    [Name("Information module")]
+    [Summary("Useful informations about me")]
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService _commands;
