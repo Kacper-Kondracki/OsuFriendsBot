@@ -24,7 +24,7 @@ namespace OsuFriendBot
             config = JsonConvert.DeserializeObject<Config>(json);
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("logs/log.log", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(config.LogPath, rollingInterval: RollingInterval.Day)
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .MinimumLevel.Is(config.MinimumLevel)
                 .CreateLogger();
@@ -48,9 +48,12 @@ namespace OsuFriendBot
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<VerificationService>()
-                .AddSingleton(new LiteDatabase(config.ConnectionString))
                 .AddSingleton<LoggingService>()
+                // Database Stuff
+                .AddSingleton(new LiteDatabase(config.ConnectionString))
+                .AddSingleton<GuildSettingsCacheService>()
                 // Transients
+                .AddTransient<DbGuildSettingsService>()
                 // Config
                 .AddLogging(configure => configure.AddSerilog())
                 .AddSingleton(config)
