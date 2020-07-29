@@ -29,12 +29,12 @@ namespace OsuFriendBot.Modules
         [Summary("Shows all commands")]
         public async Task HelpCmd()
         {
-            var modules = _commands.Modules.OrderBy(x => x.Name).ToList();
-            foreach (var module in modules)
+            System.Collections.Generic.List<ModuleInfo> modules = _commands.Modules.OrderBy(x => x.Name).ToList();
+            foreach (ModuleInfo module in modules)
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.WithTitle(module.Name).WithDescription(module.Summary ?? "No summary");
-                var commands = module.Commands;
+                System.Collections.Generic.IReadOnlyList<CommandInfo> commands = module.Commands;
                 foreach (CommandInfo command in commands)
                 {
                     string title = $"{string.Join(" | ", command.Aliases)}";
@@ -43,7 +43,7 @@ namespace OsuFriendBot.Modules
                         title += $" | {command.Summary}";
                     }
                     string text = $"{(Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix)}{command.Name}";
-                    foreach (var param in command.Parameters)
+                    foreach (ParameterInfo param in command.Parameters)
                     {
                         text += $" | {param.Name}";
                         if (param.Summary != null)

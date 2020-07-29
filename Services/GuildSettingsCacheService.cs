@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OsuFriendBot.Models;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OsuFriendBot.Services
 {
@@ -12,7 +9,7 @@ namespace OsuFriendBot.Services
         private readonly DbGuildSettingsService _dbGuildSettings;
         private readonly ILogger _logger;
 
-        private ConcurrentDictionary<ulong, GuildSettings> cache;
+        private readonly ConcurrentDictionary<ulong, GuildSettings> cache;
 
         public GuildSettingsCacheService(DbGuildSettingsService dbGuildSettings, ILogger<GuildSettingsCacheService> logger)
         {
@@ -25,7 +22,6 @@ namespace OsuFriendBot.Services
         public GuildSettings GetOrAddGuildSettings(ulong id)
         {
             return cache.GetOrAdd(id, new GuildSettings { GuildId = id });
-
         }
 
         public void UpsertGuildSettings(GuildSettings settings)
