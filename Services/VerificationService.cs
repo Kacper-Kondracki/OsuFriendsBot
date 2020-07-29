@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OsuFriendBot.Services
 {
-    class VerificationService
+    public class VerificationService
     {
         private readonly DiscordSocketClient _discord;
         private readonly ILogger _logger;
