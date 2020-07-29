@@ -34,7 +34,7 @@ namespace OsuFriendBot.Services
         {
             // Wake up services
             _services.GetRequiredService<LoggingService>();
-            _services.GetRequiredService<VerificationService>();
+            _services.GetRequiredService<HttpClient>().MaxResponseContentBufferSize = 25 * 1024 * 1024;
 
             string discordToken = _config.Token;
             if (string.IsNullOrWhiteSpace(discordToken))
