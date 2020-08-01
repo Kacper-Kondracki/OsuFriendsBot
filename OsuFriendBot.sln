@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendBot", "OsuFriendBot\OsuFriendBot.csproj", "{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendsSharp", "OsuFriendsSharp\OsuFriendsSharp\OsuFriendsSharp.csproj", "{65A1B547-2DCB-46AA-9AF3-9568F3647B5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65A1B547-2DCB-46AA-9AF3-9568F3647B5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65A1B547-2DCB-46AA-9AF3-9568F3647B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65A1B547-2DCB-46AA-9AF3-9568F3647B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65A1B547-2DCB-46AA-9AF3-9568F3647B5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
