@@ -1,5 +1,5 @@
 ![.NET Core](https://github.com/AbdShullah/OsuFriendBot/workflows/.NET%20Core/badge.svg)
-[![CodeFactor](https://www.codefactor.io/repository/github/abdshullah/osufriendbot/badge)](https://www.codefactor.io/repository/github/abdshullah/osufriendbot)
+[![CodeFactor](https://www.codefactor.io/repository/github/abdshullah/osufriendsbot/badge)](https://www.codefactor.io/repository/github/abdshullah/osufriendbot)
 ![Last commit](https://img.shields.io/github/last-commit/AbdShullah/OsuFriendBot)
 
 # OsuFriendBot
@@ -10,3 +10,4 @@ The purpose of this bot is to verify osu! account to add roles based on skills a
   * [Discord.Net](https://github.com/discord-net/Discord.Net)  
   * [Serilog](https://github.com/serilog/serilog)  
   * [Json.NET](https://github.com/JamesNK/Newtonsoft.Json)  
+  * [OsuFriendsSharp](https://github.com/AbdShullah/OsuFriendsSharp)  
