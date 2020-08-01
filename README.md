@@ -10,4 +10,3 @@ The purpose of this bot is to verify osu! account to add roles based on skills a
   * [Discord.Net](https://github.com/discord-net/Discord.Net)  
   * [Serilog](https://github.com/serilog/serilog)  
   * [Json.NET](https://github.com/JamesNK/Newtonsoft.Json)  
-  * [OsuFriendsSharp](https://github.com/AbdShullah/OsuFriendsSharp)  
