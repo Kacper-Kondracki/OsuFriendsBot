@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendBot", "OsuFriendBot\OsuFriendBot.csproj", "{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendsBot", "OsuFriendBot\OsuFriendsBot.csproj", "{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
