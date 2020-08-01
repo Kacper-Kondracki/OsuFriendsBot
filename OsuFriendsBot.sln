@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendsBot", "OsuFriendBot\OsuFriendsBot.csproj", "{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsuFriendsBot", "OsuFriendsBot\OsuFriendsBot.csproj", "{12F687C9-E622-4AC9-887F-F6A69295FE3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,10 +16,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDC297C1-670F-4683-B1DD-2A6F4A69C3C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F687C9-E622-4AC9-887F-F6A69295FE3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F687C9-E622-4AC9-887F-F6A69295FE3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F687C9-E622-4AC9-887F-F6A69295FE3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F687C9-E622-4AC9-887F-F6A69295FE3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
