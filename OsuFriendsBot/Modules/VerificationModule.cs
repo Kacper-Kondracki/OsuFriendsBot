@@ -35,10 +35,20 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows osu! roles")]
         public async Task RolesCmd()
         {
+            var roles = VerificationService.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
+
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle("Configured Roles:")
-                .WithDescription(string.Join('\n', VerificationService.FindAllRoles(Context.Guild.Roles).Select(role => role.Name)));
+                .WithTitle("Configured Roles:");
+
+            if (roles.Any())
+            {
+                embedBuilder.WithDescription(string.Join('\n', roles));
+            }
+            else
+            {
+                embedBuilder.WithDescription("None");
+            }
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
@@ -53,8 +63,16 @@ namespace OsuFriendsBot.Modules
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle($"Missing roles:")
-                .WithDescription(string.Join('\n', missingRoles));
+                .WithTitle($"Missing roles:");
+
+            if (missingRoles.Any())
+            {
+                embedBuilder.WithDescription(string.Join('\n', missingRoles));
+            }
+            else
+            {
+                embedBuilder.WithDescription("None");
+            }
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
@@ -74,10 +92,20 @@ namespace OsuFriendsBot.Modules
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
 
+
+
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle($"Created roles:")
-                .WithDescription(string.Join('\n', missingRoles));
+                .WithTitle($"Created roles:");
+
+            if (missingRoles.Any())
+            {
+                embedBuilder.WithDescription(string.Join('\n', missingRoles));
+            }
+            else
+            {
+                embedBuilder.WithDescription("None");
+            }
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
