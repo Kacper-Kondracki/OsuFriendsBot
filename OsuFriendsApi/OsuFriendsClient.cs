@@ -61,7 +61,6 @@ namespace OsuFriendsApi
 
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-
             return JsonConvert.DeserializeObject<OsuUserDetails>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
         }
     }

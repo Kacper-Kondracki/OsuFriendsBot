@@ -57,6 +57,7 @@ namespace OsuFriendsBot
                 .AddSingleton<GuildSettingsCacheService>()
                 // Transients
                 .AddTransient<DbGuildSettingsService>()
+                .AddTransient<DbUserDataService>()
                 // Config
                 .AddLogging(configure => configure.AddSerilog())
                 .AddSingleton(config)

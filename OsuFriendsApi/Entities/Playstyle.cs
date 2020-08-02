@@ -6,9 +6,9 @@ namespace OsuFriendsApi.Entities
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Playstyle
     {
-        Keyboard,
-        Tablet,
         Touchscreen,
-        Mouse
+        Tablet,
+        Mouse,
+        Keyboard,
     }
 }

@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Microsoft.Extensions.Logging;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
@@ -12,19 +13,20 @@ namespace OsuFriendsBot.Modules
     [Summary("Change your server settings")]
     public class GuildSettingsModule : ModuleBase<SocketCommandContext>
     {
-        private readonly GuildSettingsCacheService _guildSettings;
+        private readonly GuildSettingsCacheService _guildSettingsCache;
         private readonly Config _config;
         private readonly ILogger _logger;
 
-        public GuildSettingsModule(GuildSettingsCacheService guildSettings, Config config, ILogger<GuildSettingsModule> logger)
+        public GuildSettingsModule(GuildSettingsCacheService guildSettingsCache, Config config, ILogger<GuildSettingsModule> logger)
         {
-            _guildSettings = guildSettings;
+            _guildSettingsCache = guildSettingsCache;
             _config = config;
             _logger = logger;
         }
 
         [Command("prefix")]
         [Summary("Set custom bot prefix")]
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task SetPrefixCmd([Summary("If not specified, restores default prefix")] string prefix = null)
         {
             if (!string.IsNullOrEmpty(prefix) && prefix.Length > 32)
@@ -32,9 +34,9 @@ namespace OsuFriendsBot.Modules
                 await ReplyAsync("Prefix can't be longer than 32 characters!"); // TODO: Use Post-Execution handler
                 return;
             }
-            GuildSettings settings = _guildSettings.GetOrAddGuildSettings(Context.Guild.Id);
+            GuildSettings settings = _guildSettingsCache.GetOrAddGuildSettings(Context.Guild.Id);
             settings.Prefix = prefix;
-            _guildSettings.UpsertGuildSettings(settings);
+            _guildSettingsCache.UpsertGuildSettings(settings);
             await ReplyAsync($"Current prefix: {prefix ?? _config.Prefix}");
         }
     }
