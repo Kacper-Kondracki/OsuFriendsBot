@@ -42,8 +42,7 @@ namespace OsuFriendsBot.Services
         {
             UserData dbUser = _dbUserData.FindById(user.Id);
 
-            _logger.LogInformation("dbUser : {@user}", dbUser);
-            _logger.LogInformation("Id : {@user}", user.Id);
+            _logger.LogDebug("dbUser : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
 
             EmbedBuilder embedBuilder;
             OsuUser osuUser;

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OsuFriendsApi;
 using System;
 using System.Net.Http;
@@ -15,6 +16,7 @@ namespace OsuFriendsBot.Services
         private readonly CommandHandlingService _commandHandler;
         private readonly IServiceProvider _services;
         private readonly Config _config;
+        private readonly ILogger _logger;
 
         // DiscordSocketClient, CommandService, and IConfigurationRoot are injected automatically from the IServiceProvider
         public StartupService(
@@ -22,32 +24,41 @@ namespace OsuFriendsBot.Services
             HttpClient httpClient,
             CommandHandlingService commandHandler,
             IServiceProvider services,
-            Config config)
+            Config config,
+            ILogger<StartupService> logger)
         {
             _discord = discord;
             _httpClient = httpClient;
             _commandHandler = commandHandler;
             _services = services;
             _config = config;
+            _logger = logger;
         }
 
         public async Task StartAsync()
         {
             // Wake up services
+            _logger.LogInformation("Waking up Logger service");
             _services.GetRequiredService<LoggingService>();
+            _logger.LogInformation("Waking up Verification service");
             _services.GetRequiredService<VerificationService>();
 
+            _logger.LogInformation("Setting OsuFriends Api Token");
+            if (string.IsNullOrWhiteSpace(_config.OsuFriendsApiToken))
+            {
+                throw new Exception("Please enter your api token into the `config.json` file found in the applications root directory.");
+            }
             _services.GetRequiredService<OsuFriendsClient>().SetToken(_config.OsuFriendsApiToken);
             _config.OsuFriendsApiToken = string.Empty;
 
-            string discordToken = _config.Token;
-            if (string.IsNullOrWhiteSpace(discordToken))
+            _logger.LogInformation("Setting Discord Bot token");
+            if (string.IsNullOrWhiteSpace(_config.Token))
             {
                 throw new Exception("Please enter your bot's token into the `config.json` file found in the applications root directory.");
             }
-
-            await _discord.LoginAsync(TokenType.Bot, discordToken);     // Login to discord
+            await _discord.LoginAsync(TokenType.Bot, _config.Token);     // Login to discord
             _config.Token = string.Empty;                               // Clear token for security
+            _logger.LogInformation("Starting");
             await _discord.StartAsync();                                // Connect to the websocket
             await _discord.SetGameAsync($"{_config.Prefix}help", type: ActivityType.Listening);
 

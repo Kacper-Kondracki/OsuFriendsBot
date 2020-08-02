@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using OsuFriendsDb.Models;
+﻿using OsuFriendsDb.Models;
 using System.Collections.Concurrent;
 
 namespace OsuFriendsDb.Services
@@ -7,14 +6,12 @@ namespace OsuFriendsDb.Services
     public class GuildSettingsCacheService
     {
         private readonly DbGuildSettingsService _dbGuildSettings;
-        private readonly ILogger _logger;
 
         private readonly ConcurrentDictionary<ulong, GuildSettings> cache;
 
-        public GuildSettingsCacheService(DbGuildSettingsService dbGuildSettings, ILogger<GuildSettingsCacheService> logger)
+        public GuildSettingsCacheService(DbGuildSettingsService dbGuildSettings)
         {
             _dbGuildSettings = dbGuildSettings;
-            _logger = logger;
 
             cache = new ConcurrentDictionary<ulong, GuildSettings>(_dbGuildSettings.FindAllToDict());
         }

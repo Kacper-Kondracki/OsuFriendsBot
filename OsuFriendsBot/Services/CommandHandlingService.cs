@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
 using OsuFriendsDb.Services;
 using System;
 using System.Reflection;
@@ -15,14 +16,16 @@ namespace OsuFriendsBot.Services
         private readonly GuildSettingsCacheService _guildSettings;
         private readonly Config _config;
         private readonly IServiceProvider _services;
+        private readonly ILogger<CommandHandlingService> _logger;
 
-        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, GuildSettingsCacheService guildSettings, Config config, IServiceProvider services)
+        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, GuildSettingsCacheService guildSettings, Config config, IServiceProvider services, ILogger<CommandHandlingService> logger)
         {
             _discord = discord;
             _commands = commands;
             _guildSettings = guildSettings;
             _config = config;
             _services = services;
+            _logger = logger;
 
             // Hook MessageReceived so we can process each message to see
             // if it qualifies as a command.

@@ -35,7 +35,7 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows osu! roles")]
         public async Task RolesCmd()
         {
-            var roles = VerificationService.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
+            System.Collections.Generic.IEnumerable<string> roles = VerificationService.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
@@ -91,8 +91,6 @@ namespace OsuFriendsBot.Modules
                 await Context.Guild.CreateRoleAsync(role, isMentionable: false);
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
-
-
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
