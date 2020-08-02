@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using OsuFriendBot.Models;
+using OsuFriendsDb.Models;
 using System.Collections.Concurrent;
 
-namespace OsuFriendBot.Services
+namespace OsuFriendsDb.Services
 {
     public class GuildSettingsCacheService
     {

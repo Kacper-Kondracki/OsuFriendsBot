@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Reliability", "CA2000", Justification = "It won't be disposed", Scope = "member", Target = "~M:OsuFriendBot.Startup.ConfigureServices~Microsoft.Extensions.DependencyInjection.ServiceProvider")]
+[assembly: SuppressMessage("Reliability", "CA2000", Justification = "It won't be disposed", Scope = "member", Target = "~M:OsuFriendsBot.Startup.ConfigureServices~Microsoft.Extensions.DependencyInjection.ServiceProvider")]

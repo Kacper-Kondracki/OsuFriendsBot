@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using OsuFriendsApi;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot.Services
+namespace OsuFriendsBot.Services
 {
     public class StartupService
     {
@@ -35,6 +36,9 @@ namespace OsuFriendBot.Services
             // Wake up services
             _services.GetRequiredService<LoggingService>();
             _services.GetRequiredService<VerificationService>();
+
+            _services.GetRequiredService<OsuFriendsClient>().SetToken(_config.OsuFriendsApiToken);
+            _config.OsuFriendsApiToken = string.Empty;
 
             string discordToken = _config.Token;
             if (string.IsNullOrWhiteSpace(discordToken))

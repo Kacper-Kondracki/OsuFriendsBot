@@ -1,9 +1,9 @@
 ﻿using LiteDB;
-using OsuFriendBot.Models;
+using OsuFriendsDb.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OsuFriendBot.Services
+namespace OsuFriendsDb.Services
 {
     public class DbGuildSettingsService
     {

@@ -4,7 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot.Services
+namespace OsuFriendsBot.Services
 {
     public class LoggingService
     {

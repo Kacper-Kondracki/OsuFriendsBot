@@ -1,6 +1,6 @@
 ﻿using LiteDB;
 
-namespace OsuFriendBot.Models
+namespace OsuFriendsDb.Models
 {
     public class GuildSettings
     {

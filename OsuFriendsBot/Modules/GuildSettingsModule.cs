@@ -1,9 +1,10 @@
 ﻿using Discord.Commands;
 using Microsoft.Extensions.Logging;
-using OsuFriendBot.Services;
+using OsuFriendsDb.Models;
+using OsuFriendsDb.Services;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot.Modules
+namespace OsuFriendsBot.Modules
 {
     // Modules must be public and inherit from an IModuleBase
     [RequireContext(ContextType.Guild)]
@@ -31,7 +32,7 @@ namespace OsuFriendBot.Modules
                 await ReplyAsync("Prefix can't be longer than 32 characters!"); // TODO: Use Post-Execution handler
                 return;
             }
-            Models.GuildSettings settings = _guildSettings.GetOrAddGuildSettings(Context.Guild.Id);
+            GuildSettings settings = _guildSettings.GetOrAddGuildSettings(Context.Guild.Id);
             settings.Prefix = prefix;
             _guildSettings.UpsertGuildSettings(settings);
             await ReplyAsync($"Current prefix: {prefix ?? _config.Prefix}");

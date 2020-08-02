@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace OsuFriendBot
+namespace OsuFriendsBot
 {
     internal class Program
     {

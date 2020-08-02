@@ -4,7 +4,9 @@ using Discord.WebSocket;
 using LiteDB;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using OsuFriendBot.Services;
+using OsuFriendsApi;
+using OsuFriendsBot.Services;
+using OsuFriendsDb.Services;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.IO;
@@ -12,7 +14,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot
+namespace OsuFriendsBot
 {
     internal class Startup
     {
@@ -42,6 +44,7 @@ namespace OsuFriendBot
             return new ServiceCollection()
                 // Singletons
                 .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug }))
+                .AddSingleton<OsuFriendsClient>()
                 .AddSingleton<HttpClient>()
                 // Services
                 .AddSingleton<StartupService>()

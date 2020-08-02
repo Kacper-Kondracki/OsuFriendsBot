@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using OsuFriendsDb.Services;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot.Services
+namespace OsuFriendsBot.Services
 {
     public class CommandHandlingService
     {
@@ -55,7 +56,8 @@ namespace OsuFriendBot.Services
             // (!message.HasCharPrefix('!', ref argPos))
             // for a more traditional command format like !help.
             ulong? guildId = (message.Channel as SocketGuildChannel)?.Guild?.Id;
-            if (!message.HasStringPrefix(guildId != null ? _guildSettings.GetOrAddGuildSettings(guildId.Value).Prefix ?? _config.Prefix : _config.Prefix, ref argPos))
+
+            if (!message.HasStringPrefix(guildId != null ? _guildSettings.GetOrAddGuildSettings(guildId.Value).Prefix ?? _config.Prefix : _config.Prefix, ref argPos) && !message.HasMentionPrefix(_discord.CurrentUser, ref argPos))
             {
                 return;
             }

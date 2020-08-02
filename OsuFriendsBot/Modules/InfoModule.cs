@@ -1,11 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
-using OsuFriendBot.Services;
+using OsuFriendsDb.Services;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OsuFriendBot.Modules
+namespace OsuFriendsBot.Modules
 {
     // Modules must be public and inherit from an IModuleBase
     [Name("Informations")]
