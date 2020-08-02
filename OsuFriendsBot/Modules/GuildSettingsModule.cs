@@ -1,10 +1,7 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Microsoft.Extensions.Logging;
-using OsuFriendsBot.Services;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OsuFriendsBot.Modules

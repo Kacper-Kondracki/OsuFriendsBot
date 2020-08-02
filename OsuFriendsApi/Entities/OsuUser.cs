@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Globalization;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace OsuFriendsApi.Entities
 {

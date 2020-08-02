@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using OsuFriendsBot.Services;
-using OsuFriendsDb.Models;
-using OsuFriendsDb.Services;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord.WebSocket;
 
 namespace OsuFriendsBot.Modules
 {
@@ -39,7 +34,7 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows osu! roles")]
         public async Task RolesCmd()
         {
-            var embedBuilder = new EmbedBuilder();
+            EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
                 .WithTitle("Configured Roles:")
                 .WithDescription(string.Join('\n', VerificationService.FindAllRoles(Context.Guild.Roles).Select(role => role.Name)));

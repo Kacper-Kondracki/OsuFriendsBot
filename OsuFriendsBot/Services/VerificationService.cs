@@ -4,10 +4,9 @@ using Microsoft.Extensions.Logging;
 using OsuFriendsApi;
 using OsuFriendsApi.Entities;
 using System;
-using System.Globalization;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OsuFriendsBot.Services
 {
@@ -64,13 +63,12 @@ namespace OsuFriendsBot.Services
                 }
             }
 
-            var embedBuilder = new EmbedBuilder();
+            EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
                 .WithTitle($"Hi {user.Username}!")
                 .WithDescription($"Verify your osu! account to get cool roles!")
                 .AddField("Link", osuUser.Url)
                 .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif");
-
 
             await user.SendMessageAsync(embed: embedBuilder.Build());
 
@@ -92,15 +90,13 @@ namespace OsuFriendsBot.Services
             }
 
             // Success
-            var osuUserDetails = await osuUser.GetDetailsAsync();
+            OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
 
-            var guildRoles = user.Guild.Roles;
+            IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
 
-
-            var roles = FindUserRoles(guildRoles, osuUserDetails);
+            List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
             await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
             await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
-
 
             embedBuilder = new EmbedBuilder();
             embedBuilder
@@ -122,14 +118,14 @@ namespace OsuFriendsBot.Services
 
         public static List<SocketRole> FindPlaystyleRoles(IReadOnlyCollection<SocketRole> roles, List<Playstyle> playstyles)
         {
-            var playstylesString = playstyles.Select(playstyle => playstyle.ToString());
+            IEnumerable<string> playstylesString = playstyles.Select(playstyle => playstyle.ToString());
             return roles.Where(role => playstylesString.Contains(role.Name, StringComparer.InvariantCultureIgnoreCase)).ToList();
         }
 
         public static List<SocketRole> FindUserRoles(IReadOnlyCollection<SocketRole> roles, OsuUserDetails osuUserDetails)
         {
-            var allRoles = FindPlaystyleRoles(roles, osuUserDetails.Playstyle);
-            var digitRole = FindDigitRole(roles, osuUserDetails.Level.Rank.Global.ToString().Length);
+            List<SocketRole> allRoles = FindPlaystyleRoles(roles, osuUserDetails.Playstyle);
+            SocketRole digitRole = FindDigitRole(roles, osuUserDetails.Level.Rank.Global.ToString().Length);
             if (digitRole != null)
             {
                 allRoles.Add(digitRole);
@@ -139,10 +135,10 @@ namespace OsuFriendsBot.Services
 
         public static List<SocketRole> FindAllRoles(IReadOnlyCollection<SocketRole> roles)
         {
-            var allRoles = FindPlaystyleRoles(roles, new List<Playstyle>() { Playstyle.Keyboard, Playstyle.Mouse, Playstyle.Tablet, Playstyle.Touchscreen });
+            List<SocketRole> allRoles = FindPlaystyleRoles(roles, new List<Playstyle>() { Playstyle.Keyboard, Playstyle.Mouse, Playstyle.Tablet, Playstyle.Touchscreen });
             for (int i = 1; i <= 7; i++)
             {
-                var digitRole = FindDigitRole(roles, i);
+                SocketRole digitRole = FindDigitRole(roles, i);
                 if (digitRole != null)
                 {
                     allRoles.Add(digitRole);

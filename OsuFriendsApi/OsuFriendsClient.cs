@@ -2,7 +2,6 @@
 using OsuFriendsApi.Entities;
 using System;
 using System.Collections.Specialized;
-using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,6 +13,7 @@ namespace OsuFriendsApi
         private string _token;
         private readonly HttpClient _httpClient;
         public const string url = "https://osufriends.ovh/";
+
         public OsuFriendsClient(HttpClient httpClient = null)
         {
             _httpClient = httpClient ?? new HttpClient();
