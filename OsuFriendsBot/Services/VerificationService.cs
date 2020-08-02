@@ -40,103 +40,106 @@ namespace OsuFriendsBot.Services
 
         public async Task VerifyAsync(SocketGuildUser user)
         {
-            UserData dbUser = _dbUserData.FindById(user.Id);
-
-            _logger.LogDebug("dbUser : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
-
-            EmbedBuilder embedBuilder;
-            OsuUser osuUser;
-
-            // Check if user is currently veryfing his account
-            bool isVeryfying = false;
-            lock (verifyingUsersLock)
+            try
             {
-                if (verifyingUsers.TryGetValue(user.Id, out ulong guild))
+                bool isVeryfying = false;
+                lock (verifyingUsersLock)
                 {
-                    isVeryfying = guild == user.Guild.Id;
-                }
-                if (!isVeryfying)
-                {
-                    verifyingUsers[user.Id] = user.Guild.Id;
-                }
-            }
-            if (isVeryfying)
-            {
-                await user.SendMessageAsync("Complete your first verification before starting next one!");
-                return;
-            }
-
-            if (dbUser == null)
-            {
-                // If user doesn't exist in db
-                while (true)
-                {
-                    osuUser = _osuFriends.CreateUser();
-                    if ((await osuUser.GetStatusAsync()) == null)
+                    if (verifyingUsers.TryGetValue(user.Id, out ulong guild))
                     {
-                        break;
+                        isVeryfying = guild == user.Guild.Id;
+                    }
+                    if (!isVeryfying)
+                    {
+                        verifyingUsers[user.Id] = user.Guild.Id;
                     }
                 }
+                if (isVeryfying)
+                {
+                    await user.SendMessageAsync("Complete your first verification before starting next one!");
+                    return;
+                }
+
+                UserData dbUser = _dbUserData.FindById(user.Id);
+                _logger.LogDebug("dbUser : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
+
+                EmbedBuilder embedBuilder;
+                OsuUser osuUser;
+
+                if (dbUser == null)
+                {
+                    // If user doesn't exist in db
+                    while (true)
+                    {
+                        osuUser = _osuFriends.CreateUser();
+                        if ((await osuUser.GetStatusAsync()) == null)
+                        {
+                            break;
+                        }
+                    }
+
+                    embedBuilder = new EmbedBuilder();
+                    embedBuilder
+                        .WithTitle($"Hi {user.Username}!")
+                        .WithDescription($"Verify your osu! account to get cool roles on {user.Guild.Name}!")
+                        .AddField("Link", osuUser.Url)
+                        .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif");
+
+                    await user.SendMessageAsync(embed: embedBuilder.Build());
+
+                    // Retry
+                    bool success = false;
+                    for (int retry = 0; retry < 20; retry++)
+                    {
+                        if (await osuUser.GetStatusAsync() == Status.Completed)
+                        {
+                            success = true;
+                            break;
+                        }
+                        await Task.Delay(TimeSpan.FromSeconds(3));
+                    }
+                    if (!success)
+                    {
+                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}");
+                        return;
+                    }
+                    // Verification Success
+                    _dbUserData.Upsert(new UserData { UserId = user.Id, OsuFriendsKey = osuUser.Key });
+                }
+                else
+                {
+                    // If user exist in db
+                    osuUser = _osuFriends.CreateUser(dbUser.OsuFriendsKey);
+                    if (await osuUser.GetStatusAsync() != Status.Completed)
+                    {
+                        await user.SendMessageAsync($"Refreshing failed! Refresh your account again with 'refresh' command on {user.Guild.Name}");
+                        return;
+                    }
+                    // Refresh Success
+                }
+                // Success for both
+                OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
+
+                IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
+
+                List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
+
+                await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
+                await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
 
                 embedBuilder = new EmbedBuilder();
                 embedBuilder
-                    .WithTitle($"Hi {user.Username}!")
-                    .WithDescription($"Verify your osu! account to get cool roles on {user.Guild.Name}!")
-                    .AddField("Link", osuUser.Url)
-                    .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif");
-
+                    .WithTitle($"Granted roles on {user.Guild.Name}:")
+                    .WithDescription(string.Join('\n', roles.Select(role => role.Name)))
+                    .WithThumbnailUrl(osuUserDetails.Avatar.ToString());
                 await user.SendMessageAsync(embed: embedBuilder.Build());
-
-                // Retry
-                bool success = false;
-                for (int retry = 0; retry < 20; retry++)
-                {
-                    if (await osuUser.GetStatusAsync() == Status.Completed)
-                    {
-                        success = true;
-                        break;
-                    }
-                    await Task.Delay(TimeSpan.FromSeconds(3));
-                }
-                if (!success)
-                {
-                    await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}");
-                    return;
-                }
-                // Verification Success
-                _dbUserData.Upsert(new UserData { UserId = user.Id, OsuFriendsKey = osuUser.Key });
             }
-            else
+            finally
             {
-                // If user exist in db
-                osuUser = _osuFriends.CreateUser(dbUser.OsuFriendsKey);
-                if (await osuUser.GetStatusAsync() != Status.Completed)
+                lock (verifyingUsersLock)
                 {
-                    await user.SendMessageAsync($"Refreshing failed! Refresh your account again with 'refresh' command on {user.Guild.Name}");
-                    return;
+                    verifyingUsers.Remove(user.Id);
                 }
-                // Refresh Success
-            }
-            // Success for both
-            OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
-
-            IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
-
-            List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
-
-            await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
-            await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
-
-            embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"Granted roles on {user.Guild.Name}:")
-                .WithDescription(string.Join('\n', roles.Select(role => role.Name)))
-                .WithThumbnailUrl(osuUserDetails.Avatar.ToString());
-            await user.SendMessageAsync(embed: embedBuilder.Build());
-
-            lock (verifyingUsersLock)
-            {
-                verifyingUsers.Remove(user.Id);
             }
         }
 
