@@ -176,59 +176,39 @@ namespace OsuFriendsBot.Services
             {
                 int std = osuUserDetails.Std.ToString().Length;
                 SocketRole digitRole = FindDigitRole(roles, std, Gamemode.Std);
-                if (digitRole != null)
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
+
                 digitRole = FindDigitRole(roles, std, Gamemode.Generic);
-                if (digitRole != null && !allRoles.Contains(digitRole))
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
             }
             if (osuUserDetails.Taiko != null)
             {
                 int taiko = osuUserDetails.Taiko.ToString().Length;
                 SocketRole digitRole = FindDigitRole(roles, taiko, Gamemode.Taiko);
-                if (digitRole != null)
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
+
                 digitRole = FindDigitRole(roles, taiko, Gamemode.Generic);
-                if (digitRole != null && !allRoles.Contains(digitRole))
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
             }
             if (osuUserDetails.Ctb != null)
             {
                 int ctb = osuUserDetails.Ctb.ToString().Length;
                 SocketRole digitRole = FindDigitRole(roles, ctb, Gamemode.Ctb);
-                if (digitRole != null)
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
+
                 digitRole = FindDigitRole(roles, ctb, Gamemode.Generic);
-                if (digitRole != null && !allRoles.Contains(digitRole))
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
             }
             if (osuUserDetails.Mania != null)
             {
                 int mania = osuUserDetails.Mania.ToString().Length;
                 SocketRole digitRole = FindDigitRole(roles, mania, Gamemode.Mania);
-                if (digitRole != null)
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
+
                 digitRole = FindDigitRole(roles, mania, Gamemode.Generic);
-                if (digitRole != null && !allRoles.Contains(digitRole))
-                {
-                    allRoles.Add(digitRole);
-                }
+                allRoles.Add(digitRole);
             }
-            return allRoles;
+            return allRoles.Distinct().Where(role => role != null).ToList();
         }
 
         public static List<string> AllRoles()
