@@ -6,7 +6,6 @@ namespace OsuFriendsDb.Models
     {
         [BsonId]
         public ulong GuildId { get; set; }
-
         public string Prefix { get; set; }
     }
 }

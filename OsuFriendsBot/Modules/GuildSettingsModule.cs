@@ -1,7 +1,10 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Microsoft.Extensions.Logging;
+using OsuFriendsBot.Services;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OsuFriendsBot.Modules
@@ -25,7 +28,7 @@ namespace OsuFriendsBot.Modules
 
         [Command("prefix")]
         [Summary("Set custom bot prefix")]
-        public async Task SetPrefix([Summary("If not specified, restores default prefix")] string prefix = null)
+        public async Task SetPrefixCmd([Summary("If not specified, restores default prefix")] string prefix = null)
         {
             if (!string.IsNullOrEmpty(prefix) && prefix.Length > 32)
             {

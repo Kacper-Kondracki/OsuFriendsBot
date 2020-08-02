@@ -57,7 +57,8 @@ namespace OsuFriendsBot.Services
             // for a more traditional command format like !help.
             ulong? guildId = (message.Channel as SocketGuildChannel)?.Guild?.Id;
 
-            if (!message.HasStringPrefix(guildId != null ? _guildSettings.GetOrAddGuildSettings(guildId.Value).Prefix ?? _config.Prefix : _config.Prefix, ref argPos) && !message.HasMentionPrefix(_discord.CurrentUser, ref argPos))
+            if (!(message.HasStringPrefix(guildId != null ? _guildSettings.GetOrAddGuildSettings(guildId.Value).Prefix ?? _config.Prefix : _config.Prefix, ref argPos)
+                || message.HasMentionPrefix(_discord.CurrentUser, ref argPos)))
             {
                 return;
             }

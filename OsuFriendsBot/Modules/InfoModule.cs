@@ -1,8 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
+using OsuFriendsBot.Services;
 using OsuFriendsDb.Services;
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -57,6 +61,25 @@ namespace OsuFriendsBot.Modules
                 }
                 await ReplyAsync(embed: embedBuilder.Build());
             }
+        }
+
+        [Command("info")]
+        [Alias("about")]
+        [Summary("Information about bot")]
+        public async Task InfoCmd()
+        {
+            var app = await Context.Client.GetApplicationInfoAsync();
+
+            var embedBuilder = new EmbedBuilder();
+            embedBuilder
+                .WithTitle($"About {app.Name}")
+                .WithDescription(app.Description)
+                .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
+                .AddField("Author:", app.Owner)
+                .AddField("Git repo:", @"https://github.com/AbdShullah/OsuFriendsBot");
+
+            await ReplyAsync(embed: embedBuilder.Build());
+
         }
     }
 }

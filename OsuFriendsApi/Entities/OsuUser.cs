@@ -18,16 +18,16 @@ namespace OsuFriendsApi.Entities
             Key = key ?? Guid.NewGuid();
             _client = client;
             UriBuilder uriBuilder = new UriBuilder(OsuFriendsClient.url);
-            uriBuilder.Path += $"auth/{key}";
+            uriBuilder.Path += $"auth/{Key}";
             Url = uriBuilder.Uri;
         }
 
-        public async Task<Status?> GetStatus()
+        public async Task<Status?> GetStatusAsync()
         {
             return await _client.GetStatusAsync(this).ConfigureAwait(false);
         }
 
-        public async Task<OsuUserDetails> GetDetails()
+        public async Task<OsuUserDetails> GetDetailsAsync()
         {
             return await _client.GetDetailsAsync(this).ConfigureAwait(false);
         }

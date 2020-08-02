@@ -8,3 +8,6 @@ dotnet_diagnostic.CA1062.severity = silent
 
 # CA1303: Nie przekazuj literałów jako zlokalizowanych parametrów
 dotnet_diagnostic.CA1303.severity = silent
+
+# CA1305: Określ interfejs IFormatProvider
+dotnet_diagnostic.CA1305.severity = silent
