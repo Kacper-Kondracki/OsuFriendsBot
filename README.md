@@ -1,5 +1,5 @@
 ![.NET Core](https://github.com/AbdShullah/OsuFriendBot/workflows/.NET%20Core/badge.svg)
-[![CodeFactor](https://www.codefactor.io/repository/github/abdshullah/osufriendsbot/badge)](https://www.codefactor.io/repository/github/abdshullah/osufriendbot)
+[![CodeFactor](https://www.codefactor.io/repository/github/abdshullah/osufriendsbot/badge)](https://www.codefactor.io/repository/github/abdshullah/osufriendsbot)
 ![Last commit](https://img.shields.io/github/last-commit/AbdShullah/OsuFriendBot)
 
 # OsuFriendBot
