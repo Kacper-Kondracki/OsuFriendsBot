@@ -4,7 +4,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using OsuFriendsBot.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -114,14 +113,13 @@ namespace OsuFriendsBot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteBotRolesCmd()
         {
-            System.Collections.Generic.List<string> allRoles = VerificationService.AllRoles();
-            System.Collections.Generic.List<string> deletedRoles = new List<string>();
+            var deletedRoles = new System.Collections.Generic.List<string>();
+            var guildRoles = VerificationService.FindAllRoles(Context.Guild.Roles);
             
-            foreach (string role in allRoles)
+            foreach (var role in guildRoles)
             {
-                var r = Context.Guild.Roles.FirstOrDefault(a => a.Name == role);
-                await r.DeleteAsync();
-                deletedRoles.Add(r.Name);
+                await role.DeleteAsync();
+                deletedRoles.Add(role.Name);
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
 
