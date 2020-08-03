@@ -88,16 +88,8 @@ namespace OsuFriendsBot.Services
             {
                 return;
             }
-            
             // the command failed, let's notify the user that something happened.
-            if (result.ErrorReason == "The server responded with error 50007: Cannot send messages to this user")
-            {
-                await context.Channel.SendMessageAsync("Error: Please turn on your DMs for the server.");
-            }
-            else
-            {
-                await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
-            }
+            await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
         }
     }
 }
