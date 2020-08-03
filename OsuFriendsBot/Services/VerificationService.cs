@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using OsuFriendsApi;
@@ -125,7 +126,14 @@ namespace OsuFriendsBot.Services
                 List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
                 await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
                 await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
-                await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
+                try
+                {
+                    await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
+                }
+                catch (HttpException)
+                {
+
+                }
 
                 embedBuilder = new EmbedBuilder();
                 embedBuilder
