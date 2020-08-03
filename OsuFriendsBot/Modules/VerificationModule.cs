@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using OsuFriendsBot.Services;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -99,6 +100,38 @@ namespace OsuFriendsBot.Modules
             if (missingRoles.Any())
             {
                 embedBuilder.WithDescription(string.Join('\n', missingRoles));
+            }
+            else
+            {
+                embedBuilder.WithDescription("None");
+            }
+
+            await ReplyAsync(embed: embedBuilder.Build());
+        }
+        
+        [Command("deletebotroles", RunMode = RunMode.Async)]
+        [Summary("Delete bot/osu roles")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task DeleteBotRolesCmd()
+        {
+            System.Collections.Generic.List<string> allRoles = VerificationService.AllRoles();
+            System.Collections.Generic.List<string> deletedRoles = new List<string>();
+            
+            foreach (string role in allRoles)
+            {
+                var r = Context.Guild.Roles.FirstOrDefault(a => a.Name == role);
+                await r.DeleteAsync();
+                deletedRoles.Add(r.Name);
+                await Task.Delay(TimeSpan.FromMilliseconds(150));
+            }
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder
+                .WithTitle($"Deleted roles:");
+
+            if (deletedRoles.Any())
+            {
+                embedBuilder.WithDescription(string.Join('\n', deletedRoles));
             }
             else
             {
