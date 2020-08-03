@@ -123,9 +123,9 @@ namespace OsuFriendsBot.Services
                 IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
 
                 List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
-
                 await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
                 await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
+                await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
 
                 embedBuilder = new EmbedBuilder();
                 embedBuilder
