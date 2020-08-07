@@ -107,19 +107,17 @@ namespace OsuFriendsBot.Modules
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
-        
+
         [Command("deletebotroles", RunMode = RunMode.Async)]
-        [Summary("Delete bot/osu roles")]
+        [Summary("Delete osu! roles")]
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteBotRolesCmd()
         {
-            var deletedRoles = new System.Collections.Generic.List<string>();
             var guildRoles = VerificationService.FindAllRoles(Context.Guild.Roles);
-            
+
             foreach (var role in guildRoles)
             {
                 await role.DeleteAsync();
-                deletedRoles.Add(role.Name);
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
 
@@ -127,9 +125,9 @@ namespace OsuFriendsBot.Modules
             embedBuilder
                 .WithTitle($"Deleted roles:");
 
-            if (deletedRoles.Any())
+            if (guildRoles.Any())
             {
-                embedBuilder.WithDescription(string.Join('\n', deletedRoles));
+                embedBuilder.WithDescription(string.Join('\n', guildRoles));
             }
             else
             {
