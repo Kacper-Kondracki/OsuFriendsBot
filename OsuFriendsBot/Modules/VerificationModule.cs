@@ -107,5 +107,34 @@ namespace OsuFriendsBot.Modules
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
+
+        [Command("deletebotroles", RunMode = RunMode.Async)]
+        [Summary("Delete osu! roles")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task DeleteBotRolesCmd()
+        {
+            var guildRoles = VerificationService.FindAllRoles(Context.Guild.Roles);
+
+            foreach (var role in guildRoles)
+            {
+                await role.DeleteAsync();
+                await Task.Delay(TimeSpan.FromMilliseconds(150));
+            }
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder
+                .WithTitle($"Deleted roles:");
+
+            if (guildRoles.Any())
+            {
+                embedBuilder.WithDescription(string.Join('\n', guildRoles));
+            }
+            else
+            {
+                embedBuilder.WithDescription("None");
+            }
+
+            await ReplyAsync(embed: embedBuilder.Build());
+        }
     }
 }
