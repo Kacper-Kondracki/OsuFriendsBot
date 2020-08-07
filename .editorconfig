@@ -11,3 +11,6 @@ dotnet_diagnostic.CA1303.severity = silent
 
 # CA1305: Określ interfejs IFormatProvider
 dotnet_diagnostic.CA1305.severity = silent
+
+# CA1822: Oznaczaj elementy członkowskie jako statyczne
+dotnet_diagnostic.CA1822.severity = silent

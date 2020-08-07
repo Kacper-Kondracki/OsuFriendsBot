@@ -43,7 +43,7 @@ namespace OsuFriendsBot
         {
             return new ServiceCollection()
                 // Singletons
-                .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Debug }))
+                .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig { LogLevel = LogSeverity.Info }))
                 .AddSingleton<OsuFriendsClient>()
                 .AddSingleton<HttpClient>()
                 // Services
@@ -58,6 +58,9 @@ namespace OsuFriendsBot
                 // Transients
                 .AddTransient<DbGuildSettingsService>()
                 .AddTransient<DbUserDataService>()
+
+                .AddTransient<OsuRoleFindingService>()
+                .AddTransient<VerificationEmbedService>()
                 // Config
                 .AddLogging(configure => configure.AddSerilog())
                 .AddSingleton(config)

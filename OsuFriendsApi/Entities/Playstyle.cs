@@ -9,6 +9,7 @@ namespace OsuFriendsApi.Entities
     {
         [EnumMember(Value = "touch")]
         Touchscreen,
+
         Tablet,
         Mouse,
         Keyboard,

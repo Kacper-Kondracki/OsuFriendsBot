@@ -15,16 +15,20 @@ namespace OsuFriendsBot.Services
 {
     public class VerificationService
     {
+        private readonly OsuRoleFindingService _osuRoles;
+        private readonly VerificationEmbedService _embed;
         private readonly DbUserDataService _dbUserData;
         private readonly DiscordSocketClient _discord;
         private readonly OsuFriendsClient _osuFriends;
         private readonly ILogger _logger;
 
-        private readonly Dictionary<ulong, ulong> verifyingUsers = new Dictionary<ulong, ulong>();
+        private readonly HashSet<ulong> verifyingUsers = new HashSet<ulong>();
         private static readonly object verifyingUsersLock = new object();
 
-        public VerificationService(DbUserDataService dbUserData, DiscordSocketClient discord, OsuFriendsClient osuFriends, ILogger<VerificationService> logger)
+        public VerificationService(OsuRoleFindingService osuRoles, VerificationEmbedService embed, DbUserDataService dbUserData, DiscordSocketClient discord, OsuFriendsClient osuFriends, ILogger<VerificationService> logger)
         {
+            _osuRoles = osuRoles;
+            _embed = embed;
             _dbUserData = dbUserData;
             _discord = discord;
             _osuFriends = osuFriends;
@@ -43,65 +47,28 @@ namespace OsuFriendsBot.Services
         {
             try
             {
-                bool isVeryfying = false;
-                lock (verifyingUsersLock)
-                {
-                    if (verifyingUsers.TryGetValue(user.Id, out ulong guild))
-                    {
-                        isVeryfying = guild == user.Guild.Id;
-                    }
-                    if (!isVeryfying)
-                    {
-                        verifyingUsers[user.Id] = user.Guild.Id;
-                    }
-                }
+                bool isVeryfying = AddVerifyingUser(user);
                 if (isVeryfying)
                 {
-                    await user.SendMessageAsync("Complete your first verification before starting next one!");
+                    await user.SendMessageAsync("Complete your first verification before starting next one!"); // Should be error
                     return;
                 }
 
                 UserData dbUser = _dbUserData.FindById(user.Id);
                 _logger.LogDebug("dbUser : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
 
-                EmbedBuilder embedBuilder;
                 OsuUser osuUser;
-
                 if (dbUser == null)
                 {
                     // If user doesn't exist in db
-                    while (true)
-                    {
-                        osuUser = _osuFriends.CreateUser();
-                        if ((await osuUser.GetStatusAsync()) == null)
-                        {
-                            break;
-                        }
-                    }
-
-                    embedBuilder = new EmbedBuilder();
-                    embedBuilder
-                        .WithTitle($"Hi {user.Username}!")
-                        .WithDescription($"Verify your osu! account to get cool roles on {user.Guild.Name}!")
-                        .AddField("Link", osuUser.Url)
-                        .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif");
-
-                    await user.SendMessageAsync(embed: embedBuilder.Build());
+                    osuUser = await CreateOsuUserAsync();
+                    await user.SendMessageAsync(embed: _embed.CreateVerifyEmbed(user, osuUser).Build());
 
                     // Retry
-                    bool success = false;
-                    for (int retry = 0; retry < 20; retry++)
-                    {
-                        if (await osuUser.GetStatusAsync() == Status.Completed)
-                        {
-                            success = true;
-                            break;
-                        }
-                        await Task.Delay(TimeSpan.FromSeconds(3));
-                    }
+                    bool success = await WaitForVerificationStatusAsync(osuUser);
                     if (!success)
                     {
-                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}");
+                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}"); // Should be error
                         return;
                     }
                     // Verification Success
@@ -109,160 +76,101 @@ namespace OsuFriendsBot.Services
                 }
                 else
                 {
-                    // If user exist in db
-                    osuUser = _osuFriends.CreateUser(dbUser.OsuFriendsKey);
-                    if (await osuUser.GetStatusAsync() != Status.Completed)
+                    osuUser = await CreateOsuUserFromUserDataAsync(dbUser);
+                    if (osuUser == null)
                     {
-                        await user.SendMessageAsync($"Refreshing failed! Refresh your account again with 'refresh' command on {user.Guild.Name}");
+                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}"); // Should be error
                         return;
                     }
-                    // Refresh Success
                 }
                 // Success for both
-                OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
-
-                IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
-
-                List<SocketRole> roles = FindUserRoles(guildRoles, osuUserDetails);
-                await user.RemoveRolesAsync(FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
-                await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
-                try
-                {
-                    await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
-                }
-                catch (HttpException)
-                {
-
-                }
-
-                embedBuilder = new EmbedBuilder();
-                embedBuilder
-                    .WithTitle($"Granted roles on {user.Guild.Name}:")
-                    .WithDescription(string.Join('\n', roles.Select(role => role.Name)))
-                    .WithThumbnailUrl(osuUserDetails.Avatar.ToString());
-                await user.SendMessageAsync(embed: embedBuilder.Build());
+                (List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails) = await GrantUserRolesAsync(user, osuUser);
+                await user.SendMessageAsync(embed: _embed.CreateGrantedRolesEmbed(user, grantedRoles, osuUserDetails).Build());
             }
             finally
             {
-                lock (verifyingUsersLock)
+                RemoveVerifyingUser(user);
+            }
+        }
+
+        private bool AddVerifyingUser(SocketGuildUser user)
+        {
+            lock (verifyingUsersLock)
+            {
+                bool isVerifying = verifyingUsers.Contains(user.Id);
+                if (!isVerifying)
                 {
-                    verifyingUsers.Remove(user.Id);
+                    verifyingUsers.Add(user.Id);
+                }
+                return isVerifying;
+            }
+        }
+
+        private void RemoveVerifyingUser(SocketGuildUser user)
+        {
+            lock (verifyingUsersLock)
+            {
+                verifyingUsers.Remove(user.Id);
+            }
+        }
+
+        private async Task<OsuUser> CreateOsuUserAsync()
+        {
+            while (true)
+            {
+                OsuUser osuUser = _osuFriends.CreateUser();
+                if ((await osuUser.GetStatusAsync()) == null)
+                {
+                    return osuUser;
                 }
             }
         }
 
-        public static string DigitRole(int digit, Gamemode gamemode)
+        private async Task<OsuUser> CreateOsuUserFromUserDataAsync(UserData userData)
         {
-            return gamemode switch
+            OsuUser osuUser = _osuFriends.CreateUser(userData.OsuFriendsKey);
+            if (await osuUser.GetStatusAsync() != Status.Completed)
             {
-                Gamemode.Std => $"[STD] {digit} DIGIT",
-                Gamemode.Taiko => $"[TAIKO] {digit} DIGIT",
-                Gamemode.Ctb => $"[CTB] {digit} DIGIT",
-                Gamemode.Mania => $"[MANIA] {digit} DIGIT",
-                Gamemode.Generic => $"{digit} DIGIT",
-                _ => throw new NotImplementedException(),
-            };
+                return null;
+            }
+            return osuUser;
         }
 
-        public static string PlaystyleRole(Playstyle playstyle)
+        private async Task<bool> WaitForVerificationStatusAsync(OsuUser osuUser)
         {
-            return playstyle.ToString().ToUpperInvariant();
-        }
-
-        public static SocketRole FindDigitRole(IReadOnlyCollection<SocketRole> roles, int digit, Gamemode gamemode)
-        {
-            return roles.FirstOrDefault(role => role.Name.Equals(DigitRole(digit, gamemode), StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        public static List<SocketRole> FindPlaystyleRoles(IReadOnlyCollection<SocketRole> roles, List<Playstyle> playstyles)
-        {
-            IEnumerable<string> playstylesString = playstyles.Select(playstyle => PlaystyleRole(playstyle));
-            return roles.Where(role => playstylesString.Contains(role.Name, StringComparer.InvariantCultureIgnoreCase)).ToList();
-        }
-
-        public static List<SocketRole> FindUserRoles(IReadOnlyCollection<SocketRole> roles, OsuUserDetails osuUserDetails)
-        {
-            List<SocketRole> allRoles = FindPlaystyleRoles(roles, osuUserDetails.Playstyle);
-            if (osuUserDetails.Std != null)
+            bool success = false;
+            for (int retry = 0; retry < 20; retry++)
             {
-                int std = osuUserDetails.Std.ToString().Length;
-                SocketRole digitRole = FindDigitRole(roles, std, Gamemode.Std);
-                allRoles.Add(digitRole);
-
-                digitRole = FindDigitRole(roles, std, Gamemode.Generic);
-                allRoles.Add(digitRole);
-            }
-            if (osuUserDetails.Taiko != null)
-            {
-                int taiko = osuUserDetails.Taiko.ToString().Length;
-                SocketRole digitRole = FindDigitRole(roles, taiko, Gamemode.Taiko);
-                allRoles.Add(digitRole);
-
-                digitRole = FindDigitRole(roles, taiko, Gamemode.Generic);
-                allRoles.Add(digitRole);
-            }
-            if (osuUserDetails.Ctb != null)
-            {
-                int ctb = osuUserDetails.Ctb.ToString().Length;
-                SocketRole digitRole = FindDigitRole(roles, ctb, Gamemode.Ctb);
-                allRoles.Add(digitRole);
-
-                digitRole = FindDigitRole(roles, ctb, Gamemode.Generic);
-                allRoles.Add(digitRole);
-            }
-            if (osuUserDetails.Mania != null)
-            {
-                int mania = osuUserDetails.Mania.ToString().Length;
-                SocketRole digitRole = FindDigitRole(roles, mania, Gamemode.Mania);
-                allRoles.Add(digitRole);
-
-                digitRole = FindDigitRole(roles, mania, Gamemode.Generic);
-                allRoles.Add(digitRole);
-            }
-            return allRoles.Distinct().Where(role => role != null).ToList();
-        }
-
-        public static List<string> AllRoles()
-        {
-            List<string> allRoles = new List<string>();
-            foreach (Playstyle playstyle in Enum.GetValues(typeof(Playstyle)))
-            {
-                allRoles.Add(PlaystyleRole(playstyle));
-            }
-            foreach (Gamemode gamemode in Enum.GetValues(typeof(Gamemode)))
-            {
-                for (int i = 1; i <= 7; i++)
+                _logger.LogDebug("Status {status}", await osuUser.GetStatusAsync());
+                if (await osuUser.GetStatusAsync() == Status.Completed)
                 {
-                    allRoles.Add(DigitRole(i, gamemode));
+                    success = true;
+                    break;
                 }
+                await Task.Delay(TimeSpan.FromSeconds(3));
             }
-            return allRoles;
+            return success;
         }
 
-        public static List<SocketRole> FindAllRoles(IReadOnlyCollection<SocketRole> roles)
+        private async Task<(List<SocketRole>, OsuUserDetails)> GrantUserRolesAsync(SocketGuildUser user, OsuUser osuUser)
         {
-            List<SocketRole> allRoles = FindPlaystyleRoles(roles, new List<Playstyle>() { Playstyle.Keyboard, Playstyle.Mouse, Playstyle.Tablet, Playstyle.Touchscreen });
-            foreach (Gamemode gamemode in Enum.GetValues(typeof(Gamemode)))
-            {
-                for (int i = 1; i <= 7; i++)
-                {
-                    SocketRole digitRole = FindDigitRole(roles, i, gamemode);
-                    if (digitRole != null)
-                    {
-                        allRoles.Add(digitRole);
-                    }
-                }
-            }
-            return allRoles;
-        }
-    }
+            OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
+            IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
+            // Find roles that user should have
+            List<SocketRole> roles = _osuRoles.FindUserRoles(guildRoles, osuUserDetails);
+            // Remove roles that user shouldn't have
+            await user.RemoveRolesAsync(_osuRoles.FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
+            // Add roles that user should have
+            await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
+            // Change user nickname to that from game
 
-    public enum Gamemode
-    {
-        Std,
-        Taiko,
-        Ctb,
-        Mania,
-        Generic
+            // Ignore if can't change nickname
+            try
+            {
+                await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
+            }
+            catch (HttpException) { }
+            return (roles, osuUserDetails);
+        }
     }
 }
