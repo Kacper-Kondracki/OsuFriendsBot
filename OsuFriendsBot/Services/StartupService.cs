@@ -58,7 +58,6 @@ namespace OsuFriendsBot.Services
             }
             await _discord.LoginAsync(TokenType.Bot, _config.Token);     // Login to discord
             _config.Token = string.Empty;                               // Clear token for security
-            _logger.LogInformation("Starting");
             await _discord.StartAsync();                                // Connect to the websocket
             await _discord.SetGameAsync($"{_config.Prefix}help", type: ActivityType.Listening);
 
