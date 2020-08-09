@@ -76,14 +76,15 @@ namespace OsuFriendsBot.Services
                 {
                     return VerificationResult.FromError("Complete your first verification before starting next one");
                 }
-                UserData dbUser = null; //_dbUserData.FindById(user.Id);
-                _logger.LogTrace("User : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
+                UserData dbUser = _dbUserData.FindById(user.Id);
+                _logger.LogTrace("DbUser : {@dbUser} | Id : {@user} | Username: {@username}", dbUser, user.Id, user.Username);
 
                 OsuUser osuUser;
-                if (dbUser == null)
+                if (dbUser.OsuFriendsKey == null || true) // Token expires after one day, so we can't use it, but the api developer is working on a fix
                 {
                     // If user doesn't exist in db
                     osuUser = await CreateOsuUserAsync();
+
                     await user.SendMessageAsync(embed: new VerifyEmbed(user, osuUser).Build());
 
                     // Retry
@@ -93,7 +94,7 @@ namespace OsuFriendsBot.Services
                         return VerificationResult.FromError($"Verification failed because it timeouted! Try again with 'verify' command on {user.Guild.Name}");
                     }
                     // Verification Success
-                    _dbUserData.Upsert(new UserData { UserId = user.Id, OsuFriendsKey = osuUser.Key });
+                    dbUser.OsuFriendsKey = osuUser.Key;
                 }
                 else
                 {
@@ -105,12 +106,17 @@ namespace OsuFriendsBot.Services
                 }
                 // Success for both
                 (List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails) = await GrantUserRolesAsync(user, osuUser);
-                await user.SendMessageAsync(embed: new GrantedRolesEmbed(user, grantedRoles, osuUserDetails).Build());
+                await user.SendMessageAsync(embed: new GrantedRolesEmbed(user, grantedRoles, osuUserDetails, dbUser).Build());
+                dbUser.Std = osuUserDetails.Std;
+                dbUser.Taiko = osuUserDetails.Taiko;
+                dbUser.Ctb = osuUserDetails.Ctb;
+                dbUser.Mania = osuUserDetails.Mania;
+                _dbUserData.Upsert(dbUser);
             }
             catch (HttpException e)
             {
                 RemoveVerifyingUser(user);
-                _logger.LogDebug("httpCode: {httpCode} | discordCode: {discordCode}", e.HttpCode, e.DiscordCode);
+                _logger.LogTrace("httpCode: {httpCode} | discordCode: {discordCode}", e.HttpCode, e.DiscordCode);
                 switch (e.DiscordCode)
                 {
                     case 50007:

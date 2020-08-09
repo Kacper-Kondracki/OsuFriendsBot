@@ -15,7 +15,7 @@ namespace OsuFriendsDb.Services
 
         public UserData FindById(ulong user)
         {
-            return _database.GetCollection<UserData>(collection).FindOne(x => x.UserId == user);
+            return _database.GetCollection<UserData>(collection).FindOne(x => x.UserId == user) ?? new UserData { UserId = user };
         }
 
         public bool Upsert(UserData user)

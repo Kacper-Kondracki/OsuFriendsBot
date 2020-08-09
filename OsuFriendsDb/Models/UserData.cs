@@ -8,6 +8,10 @@ namespace OsuFriendsDb.Models
         [BsonId]
         public ulong UserId { get; set; }
 
-        public Guid OsuFriendsKey { get; set; }
+        public Guid? OsuFriendsKey { get; set; }
+        public int? Std { get; set; }
+        public int? Taiko { get; set; }
+        public int? Ctb { get; set; }
+        public int? Mania { get; set; }
     }
 }
