@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
+using OsuFriendsBot.Embeds;
 using OsuFriendsDb.Services;
 using System;
 using System.Reflection;
@@ -89,7 +90,7 @@ namespace OsuFriendsBot.Services
                 return;
             }
             // the command failed, let's notify the user that something happened.
-            await context.Channel.SendMessageAsync($"Error: {result.ErrorReason}");
+            await context.Channel.SendMessageAsync(embed: new ErrorEmbed(result).Build());
         }
     }
 }

@@ -19,11 +19,19 @@ namespace OsuFriendsApi.Entities
             Url = uriBuilder.Uri;
         }
 
+        /// <summary>
+        /// Gets API status.
+        /// </summary>
+        /// <returns>API Status.</returns>
         public async Task<Status?> GetStatusAsync()
         {
             return await _client.GetStatusAsync(this).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Gets user details.
+        /// </summary>
+        /// <returns>User details.</returns>
         public async Task<OsuUserDetails> GetDetailsAsync()
         {
             return await _client.GetDetailsAsync(this).ConfigureAwait(false);

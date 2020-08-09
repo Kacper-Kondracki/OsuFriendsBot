@@ -1,9 +1,13 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using OsuFriendsApi;
 using OsuFriendsApi.Entities;
+using OsuFriendsBot.Embeds;
+using OsuFriendsBot.Osu.OsuFriendsBot.Services;
+using OsuFriendsBot.RuntimeResults;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
 using System;
@@ -15,8 +19,6 @@ namespace OsuFriendsBot.Services
 {
     public class VerificationService
     {
-        private readonly OsuRoleFindingService _osuRoles;
-        private readonly VerificationEmbedService _embed;
         private readonly DbUserDataService _dbUserData;
         private readonly DiscordSocketClient _discord;
         private readonly OsuFriendsClient _osuFriends;
@@ -25,10 +27,8 @@ namespace OsuFriendsBot.Services
         private readonly HashSet<ulong> verifyingUsers = new HashSet<ulong>();
         private static readonly object verifyingUsersLock = new object();
 
-        public VerificationService(OsuRoleFindingService osuRoles, VerificationEmbedService embed, DbUserDataService dbUserData, DiscordSocketClient discord, OsuFriendsClient osuFriends, ILogger<VerificationService> logger)
+        public VerificationService(DbUserDataService dbUserData, DiscordSocketClient discord, OsuFriendsClient osuFriends, ILogger<VerificationService> logger)
         {
-            _osuRoles = osuRoles;
-            _embed = embed;
             _dbUserData = dbUserData;
             _discord = discord;
             _osuFriends = osuFriends;
@@ -39,37 +39,58 @@ namespace OsuFriendsBot.Services
 
         public async Task UserJoinedAsync(SocketGuildUser user)
         {
-            _ = VerifyAsync(user);
+            _ = Task.Run(async () =>
+            {
+                RuntimeResult result = await VerifyAsync(user);
+
+                // Send error if can open DM
+                if (!result.IsSuccess)
+                {
+                    try
+                    {
+                        await user.SendMessageAsync(embed: new ErrorEmbed(result).Build());
+                    }
+                    catch (HttpException e)
+                    {
+                        switch (e.DiscordCode)
+                        {
+                            case 50007:
+                                return;
+
+                            default:
+                                break;
+                        }
+                        throw;
+                    }
+                }
+            });
             await Task.CompletedTask;
         }
 
-        public async Task VerifyAsync(SocketGuildUser user)
+        public async Task<RuntimeResult> VerifyAsync(SocketGuildUser user)
         {
             try
             {
                 bool isVeryfying = AddVerifyingUser(user);
                 if (isVeryfying)
                 {
-                    await user.SendMessageAsync("Complete your first verification before starting next one!"); // Should be error
-                    return;
+                    return VerificationResult.FromError("Complete your first verification before starting next one");
                 }
-
-                UserData dbUser = _dbUserData.FindById(user.Id);
-                _logger.LogDebug("dbUser : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
+                UserData dbUser = null; //_dbUserData.FindById(user.Id);
+                _logger.LogTrace("User : {@dbUser}\n Id : {@user}\nUsername: {@username}", dbUser, user.Id, user.Username);
 
                 OsuUser osuUser;
                 if (dbUser == null)
                 {
                     // If user doesn't exist in db
                     osuUser = await CreateOsuUserAsync();
-                    await user.SendMessageAsync(embed: _embed.CreateVerifyEmbed(user, osuUser).Build());
+                    await user.SendMessageAsync(embed: new VerifyEmbed(user, osuUser).Build());
 
                     // Retry
                     bool success = await WaitForVerificationStatusAsync(osuUser);
                     if (!success)
                     {
-                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}"); // Should be error
-                        return;
+                        return VerificationResult.FromError($"Verification failed because it timeouted! Try again with 'verify' command on {user.Guild.Name}");
                     }
                     // Verification Success
                     _dbUserData.Upsert(new UserData { UserId = user.Id, OsuFriendsKey = osuUser.Key });
@@ -79,18 +100,34 @@ namespace OsuFriendsBot.Services
                     osuUser = await CreateOsuUserFromUserDataAsync(dbUser);
                     if (osuUser == null)
                     {
-                        await user.SendMessageAsync($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}"); // Should be error
-                        return;
+                        return VerificationResult.FromError($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}");
                     }
                 }
                 // Success for both
                 (List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails) = await GrantUserRolesAsync(user, osuUser);
-                await user.SendMessageAsync(embed: _embed.CreateGrantedRolesEmbed(user, grantedRoles, osuUserDetails).Build());
+                await user.SendMessageAsync(embed: new GrantedRolesEmbed(user, grantedRoles, osuUserDetails).Build());
             }
-            finally
+            catch (HttpException e)
             {
                 RemoveVerifyingUser(user);
+                _logger.LogDebug("httpCode: {httpCode} | discordCode: {discordCode}", e.HttpCode, e.DiscordCode);
+                switch (e.DiscordCode)
+                {
+                    case 50007:
+                        return VerificationResult.FromError("Sorry, I can't send direct message to you, please check if you block DMs via server");
+
+                    default:
+                        break;
+                }
+                throw;
             }
+            catch
+            {
+                RemoveVerifyingUser(user);
+                throw;
+            }
+            RemoveVerifyingUser(user);
+            return VerificationResult.FromSuccess();
         }
 
         private bool AddVerifyingUser(SocketGuildUser user)
@@ -139,10 +176,11 @@ namespace OsuFriendsBot.Services
         private async Task<bool> WaitForVerificationStatusAsync(OsuUser osuUser)
         {
             bool success = false;
-            for (int retry = 0; retry < 20; retry++)
+            for (int retry = 0; retry < 30; retry++)
             {
-                _logger.LogDebug("Status {status}", await osuUser.GetStatusAsync());
-                if (await osuUser.GetStatusAsync() == Status.Completed)
+                Status? status = await osuUser.GetStatusAsync();
+                _logger.LogTrace("Status: {@status}", status);
+                if (status == Status.Completed)
                 {
                     success = true;
                     break;
@@ -157,9 +195,9 @@ namespace OsuFriendsBot.Services
             OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
             IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
             // Find roles that user should have
-            List<SocketRole> roles = _osuRoles.FindUserRoles(guildRoles, osuUserDetails);
+            List<SocketRole> roles = OsuRoles.FindUserRoles(guildRoles, osuUserDetails);
             // Remove roles that user shouldn't have
-            await user.RemoveRolesAsync(_osuRoles.FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
+            await user.RemoveRolesAsync(OsuRoles.FindAllRoles(guildRoles).Where(role => user.Roles.Contains(role) && !roles.Contains(role)));
             // Add roles that user should have
             await user.AddRolesAsync(roles.Where(role => !user.Roles.Contains(role)));
             // Change user nickname to that from game
@@ -169,7 +207,10 @@ namespace OsuFriendsBot.Services
             {
                 await user.ModifyAsync(properties => properties.Nickname = osuUserDetails.Username);
             }
-            catch (HttpException) { }
+            catch (HttpException)
+            {
+            }
+
             return (roles, osuUserDetails);
         }
     }

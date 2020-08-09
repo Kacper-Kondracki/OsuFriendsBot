@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
-using OsuFriendsBot.Services;
+using OsuFriendsBot.Osu.OsuFriendsBot.Services;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
 using System;
@@ -17,14 +17,12 @@ namespace OsuFriendsBot.Modules
     [RequireUserPermission(GuildPermission.Administrator)]
     public class AdminModule : ModuleBase<SocketCommandContext>
     {
-        private readonly OsuRoleFindingService _osuRoles;
         private readonly GuildSettingsCacheService _guildSettingsCache;
         private readonly Config _config;
         private readonly ILogger _logger;
 
-        public AdminModule(OsuRoleFindingService osuRoles, GuildSettingsCacheService guildSettingsCache, Config config, ILogger<AdminModule> logger)
+        public AdminModule(GuildSettingsCacheService guildSettingsCache, Config config, ILogger<AdminModule> logger)
         {
-            _osuRoles = osuRoles;
             _guildSettingsCache = guildSettingsCache;
             _config = config;
             _logger = logger;
@@ -51,7 +49,7 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows osu! roles")]
         public async Task RolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> roles = _osuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
+            System.Collections.Generic.IEnumerable<string> roles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
@@ -73,8 +71,8 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows missing roles")]
         public async Task MissingRolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> allGuildRoles = _osuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
-            System.Collections.Generic.List<string> allRoles = _osuRoles.AllRoles();
+            System.Collections.Generic.IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
+            System.Collections.Generic.List<string> allRoles = OsuRoles.AllRoles();
             System.Collections.Generic.IEnumerable<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase);
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -97,8 +95,8 @@ namespace OsuFriendsBot.Modules
         [Summary("Creates missing roles")]
         public async Task CreateMissingRolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> allGuildRoles = _osuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
-            System.Collections.Generic.List<string> allRoles = _osuRoles.AllRoles();
+            System.Collections.Generic.IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
+            System.Collections.Generic.List<string> allRoles = OsuRoles.AllRoles();
             System.Collections.Generic.IEnumerable<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase);
 
             foreach (string role in missingRoles)
@@ -128,7 +126,7 @@ namespace OsuFriendsBot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteBotRolesCmd()
         {
-            System.Collections.Generic.List<Discord.WebSocket.SocketRole> guildRoles = _osuRoles.FindAllRoles(Context.Guild.Roles);
+            System.Collections.Generic.List<Discord.WebSocket.SocketRole> guildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles);
 
             foreach (Discord.WebSocket.SocketRole role in guildRoles)
             {

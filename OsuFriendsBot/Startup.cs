@@ -58,9 +58,6 @@ namespace OsuFriendsBot
                 // Transients
                 .AddTransient<DbGuildSettingsService>()
                 .AddTransient<DbUserDataService>()
-
-                .AddTransient<OsuRoleFindingService>()
-                .AddTransient<VerificationEmbedService>()
                 // Config
                 .AddLogging(configure => configure.AddSerilog())
                 .AddSingleton(config)

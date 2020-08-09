@@ -23,11 +23,20 @@ namespace OsuFriendsApi
             }
         }
 
+        /// <summary>
+        /// Sets secret key for API
+        /// </summary>
+        /// <param name="token">The API token</param>
         public void SetToken(string token)
         {
             _token = token;
         }
 
+        /// <summary>
+        /// Creates osu! user.
+        /// </summary>
+        /// <param name="key">Random if null.</param>
+        /// <returns>New osu! user.</returns>
         public OsuUser CreateUser(Guid? key = null)
         {
             return new OsuUser(key, this);
