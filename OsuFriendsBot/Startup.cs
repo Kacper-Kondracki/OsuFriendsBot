@@ -8,6 +8,7 @@ using OsuFriendsApi;
 using OsuFriendsBot.Services;
 using OsuFriendsDb.Services;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.IO;
 using System.Net.Http;
@@ -27,8 +28,8 @@ namespace OsuFriendsBot
 
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(config.LogPath, rollingInterval: RollingInterval.Day)
-                .WriteTo.Console(theme: AnsiConsoleTheme.Code)
-                .MinimumLevel.Is(config.MinimumLevel)
+                .WriteTo.Console(theme: AnsiConsoleTheme.Code, restrictedToMinimumLevel: config.MinimumLevel)
+                .MinimumLevel.Is(LogEventLevel.Verbose)
                 .CreateLogger();
         }
 

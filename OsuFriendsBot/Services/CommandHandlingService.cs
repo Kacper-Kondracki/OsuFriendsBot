@@ -90,6 +90,7 @@ namespace OsuFriendsBot.Services
                 return;
             }
             // the command failed, let's notify the user that something happened.
+            _logger.LogTrace("Command failed: {command} | {error} | {errorReason}", command.Value?.Name, result.Error, result.ErrorReason);
             await context.Channel.SendMessageAsync(embed: new ErrorEmbed(result).Build());
         }
     }

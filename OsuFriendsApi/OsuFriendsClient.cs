@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using OsuFriendsApi.Entities;
 using System;
 using System.Collections.Specialized;
@@ -12,11 +13,14 @@ namespace OsuFriendsApi
     {
         private string _token;
         private readonly HttpClient _httpClient;
+        private readonly ILogger _logger;
         public const string url = "https://osufriends.ovh/";
 
-        public OsuFriendsClient(HttpClient httpClient = null)
+        public OsuFriendsClient(HttpClient httpClient, ILogger<OsuFriendsClient> logger)
         {
-            _httpClient = httpClient ?? new HttpClient();
+            _httpClient = httpClient;
+            _logger = logger;
+
             if (string.IsNullOrEmpty(_httpClient.DefaultRequestHeaders.UserAgent.ToString()))
             {
                 _httpClient.DefaultRequestHeaders.Add("user-agent", "hello"); // For some reason api doesn't accept null user agent
@@ -52,10 +56,12 @@ namespace OsuFriendsApi
             query["secret"] = _token;
             uriBuilder.Query = query.ToString();
 
+            _logger.LogTrace("Request status for {key}", user.Key);
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-
-            return JsonConvert.DeserializeObject<Status?>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            _logger.LogTrace("Status of {key}: {status}", user.Key, content);
+            return JsonConvert.DeserializeObject<Status?>(content);
         }
 
         public async Task<OsuUserDetails> GetDetailsAsync(OsuUser user)
@@ -68,9 +74,12 @@ namespace OsuFriendsApi
             query["secret"] = _token;
             uriBuilder.Query = query.ToString();
 
+            _logger.LogTrace("Request details for {key}", user.Key);
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            return JsonConvert.DeserializeObject<OsuUserDetails>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            _logger.LogTrace("Details of {key}: {details}", user.Key, content);
+            return JsonConvert.DeserializeObject<OsuUserDetails>(content);
         }
     }
 }

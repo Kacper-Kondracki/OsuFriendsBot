@@ -39,7 +39,7 @@ namespace OsuFriendsBot.Services
 
         public async Task UserJoinedAsync(SocketGuildUser user)
         {
-            _ = Task.Run(async () =>
+            /*_ = Task.Run(async () =>
             {
                 RuntimeResult result = await VerifyAsync(user);
 
@@ -63,12 +63,14 @@ namespace OsuFriendsBot.Services
                         throw;
                     }
                 }
-            });
+            });*/
             await Task.CompletedTask;
         }
 
         public async Task<RuntimeResult> VerifyAsync(SocketGuildUser user)
         {
+            _logger.LogTrace("Verifying user: {username}", user.Username);
+
             try
             {
                 bool isVeryfying = AddVerifyingUser(user);
@@ -79,8 +81,14 @@ namespace OsuFriendsBot.Services
                 UserData dbUser = _dbUserData.FindById(user.Id);
                 _logger.LogTrace("DbUser : {@dbUser} | Id : {@user} | Username: {@username}", dbUser, user.Id, user.Username);
 
-                OsuUser osuUser;
-                if (dbUser.OsuFriendsKey == null || true) // Token expires after one day, so we can't use it, but the api developer is working on a fix
+                OsuUser osuUser = null;
+
+                if (dbUser.OsuFriendsKey != null)
+                {
+                    osuUser = await CreateOsuUserFromUserDataAsync(dbUser);
+                }
+
+                if (osuUser == null)
                 {
                     // If user doesn't exist in db
                     osuUser = await CreateOsuUserAsync();
@@ -91,18 +99,11 @@ namespace OsuFriendsBot.Services
                     bool success = await WaitForVerificationStatusAsync(osuUser);
                     if (!success)
                     {
+                        RemoveVerifyingUser(user);
                         return VerificationResult.FromError($"Verification failed because it timeouted! Try again with 'verify' command on {user.Guild.Name}");
                     }
                     // Verification Success
                     dbUser.OsuFriendsKey = osuUser.Key;
-                }
-                else
-                {
-                    osuUser = await CreateOsuUserFromUserDataAsync(dbUser);
-                    if (osuUser == null)
-                    {
-                        return VerificationResult.FromError($"Verification failed! Verify your account again with 'verify' command on {user.Guild.Name}");
-                    }
                 }
                 // Success for both
                 (List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails) = await GrantUserRolesAsync(user, osuUser);
@@ -162,7 +163,9 @@ namespace OsuFriendsBot.Services
             while (true)
             {
                 OsuUser osuUser = _osuFriends.CreateUser();
-                if ((await osuUser.GetStatusAsync()) == null)
+                var status = await osuUser.GetStatusAsync();
+                _logger.LogTrace("Verification Status: {status}", status);
+                if (status == Status.Invalid)
                 {
                     return osuUser;
                 }
@@ -172,7 +175,9 @@ namespace OsuFriendsBot.Services
         private async Task<OsuUser> CreateOsuUserFromUserDataAsync(UserData userData)
         {
             OsuUser osuUser = _osuFriends.CreateUser(userData.OsuFriendsKey);
-            if (await osuUser.GetStatusAsync() != Status.Completed)
+            var status = await osuUser.GetStatusAsync();
+            _logger.LogTrace("OsuDb Status: {status}", status);
+            if (status != Status.Completed)
             {
                 return null;
             }
@@ -185,7 +190,7 @@ namespace OsuFriendsBot.Services
             for (int retry = 0; retry < 30; retry++)
             {
                 Status? status = await osuUser.GetStatusAsync();
-                _logger.LogTrace("Status: {@status}", status);
+                _logger.LogTrace("Verification Status: {@status}", status);
                 if (status == Status.Completed)
                 {
                     success = true;
@@ -199,6 +204,7 @@ namespace OsuFriendsBot.Services
         private async Task<(List<SocketRole>, OsuUserDetails)> GrantUserRolesAsync(SocketGuildUser user, OsuUser osuUser)
         {
             OsuUserDetails osuUserDetails = await osuUser.GetDetailsAsync();
+            _logger.LogTrace("Details: {@details}", osuUserDetails);
             IReadOnlyCollection<SocketRole> guildRoles = user.Guild.Roles;
             // Find roles that user should have
             List<SocketRole> roles = OsuRoles.FindUserRoles(guildRoles, osuUserDetails);
