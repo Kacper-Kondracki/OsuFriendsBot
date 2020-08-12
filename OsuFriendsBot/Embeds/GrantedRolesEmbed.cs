@@ -14,7 +14,8 @@ namespace OsuFriendsBot.Embeds
         {
             WithTitle($"Granted roles on {user.Guild.Name}:")
             .WithDescription(string.Join('\n', grantedRoles.Select(role => role.Name).OrderByDescending(role => role)))
-            .WithThumbnailUrl(osuUserDetails.Avatar.ToString());
+            .WithThumbnailUrl(osuUserDetails.Avatar.ToString())
+            .WithColor(Discord.Color.Gold);
 
             AddProgressField(userData.Std, osuUserDetails.Std, Gamemode.Std);
             AddProgressField(userData.Taiko, osuUserDetails.Taiko, Gamemode.Taiko);

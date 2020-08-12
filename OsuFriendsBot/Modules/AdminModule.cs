@@ -53,7 +53,8 @@ namespace OsuFriendsBot.Modules
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle("Configured Roles:");
+                .WithTitle("Configured Roles:")
+                .WithColor(Color.Blue);
 
             if (roles.Any())
             {
@@ -77,7 +78,8 @@ namespace OsuFriendsBot.Modules
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle($"Missing roles:");
+                .WithTitle($"Missing roles:")
+                .WithColor(Color.Blue);
 
             if (missingRoles.Any())
             {
@@ -107,7 +109,8 @@ namespace OsuFriendsBot.Modules
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle($"Created roles:");
+                .WithTitle($"Created roles:")
+                .WithColor(Color.Blue);
 
             if (missingRoles.Any())
             {
@@ -136,7 +139,8 @@ namespace OsuFriendsBot.Modules
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
-                .WithTitle($"Deleted roles:");
+                .WithTitle($"Deleted roles:")
+                .WithColor(Color.Blue);
 
             if (guildRoles.Any())
             {

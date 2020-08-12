@@ -33,7 +33,7 @@ namespace OsuFriendsBot.Modules
             foreach (ModuleInfo module in modules)
             {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.WithTitle(module.Name).WithDescription(module.Summary ?? "No summary");
+                embedBuilder.WithTitle(module.Name).WithDescription(module.Summary ?? "No summary").WithColor(Color.Blue);
                 System.Collections.Generic.IReadOnlyList<CommandInfo> commands = module.Commands;
                 foreach (CommandInfo command in commands)
                 {
@@ -71,7 +71,21 @@ namespace OsuFriendsBot.Modules
                 .WithDescription(app.Description)
                 .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
                 .AddField("Author:", app.Owner)
-                .AddField("Git repo:", @"https://github.com/AbdShullah/OsuFriendsBot");
+                .AddField("Git repo:", @"https://github.com/AbdShullah/OsuFriendsBot")
+                .WithColor(Color.Blue);
+
+            await ReplyAsync(embed: embedBuilder.Build());
+        }
+        [Command("version")]
+        [Summary("Bot version")]
+        public async Task VersionCmd()
+        {
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder
+                .WithTitle($"0.0.6")
+                .WithDescription("Current Bot Version")
+                .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
+                .WithColor(Color.Blue);
 
             await ReplyAsync(embed: embedBuilder.Build());
         }

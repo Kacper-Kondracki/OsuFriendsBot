@@ -11,7 +11,8 @@ namespace OsuFriendsBot.Embeds
             WithTitle($"Hi {user.Username}!")
             .WithDescription($"Verify your osu! account to get cool roles on {user.Guild.Name}!")
             .AddField("Link", osuUser.Url)
-            .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif");
+            .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif")
+            .WithColor(Discord.Color.Gold);
         }
     }
 }
