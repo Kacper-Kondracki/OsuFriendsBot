@@ -12,10 +12,10 @@ namespace OsuFriendsBot.Embeds
     {
         public GrantedRolesEmbed(SocketGuildUser user, List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails, UserData userData)
         {
-            WithTitle($"Granted roles on {user.Guild.Name}:")
-            .WithDescription(string.Join('\n', grantedRoles.Select(role => role.Name).OrderByDescending(role => role)))
-            .WithThumbnailUrl(osuUserDetails.Avatar.ToString())
-            .WithColor(Discord.Color.Gold);
+            Title = $"Granted roles on {user.Guild.Name}:";
+            Description = string.Join('\n', grantedRoles.Select(role => role.Name).OrderByDescending(role => role));
+            ThumbnailUrl = osuUserDetails.Avatar.ToString();
+            Color = EmbedColors.Important;
 
             AddProgressField(userData.Std, osuUserDetails.Std, Gamemode.Std);
             AddProgressField(userData.Taiko, osuUserDetails.Taiko, Gamemode.Taiko);

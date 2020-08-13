@@ -59,7 +59,7 @@ namespace OsuFriendsApi
             _logger.LogTrace("Request status for {key}", user.Key);
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             _logger.LogTrace("Status of {key}: {status}", user.Key, content);
             return JsonConvert.DeserializeObject<Status?>(content);
         }
@@ -77,7 +77,7 @@ namespace OsuFriendsApi
             _logger.LogTrace("Request details for {key}", user.Key);
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             _logger.LogTrace("Details of {key}: {details}", user.Key, content);
             return JsonConvert.DeserializeObject<OsuUserDetails>(content);
         }

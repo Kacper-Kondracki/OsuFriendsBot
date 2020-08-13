@@ -8,11 +8,11 @@ namespace OsuFriendsBot.Embeds
     {
         public VerifyEmbed(SocketGuildUser user, OsuUser osuUser)
         {
-            WithTitle($"Hi {user.Username}!")
-            .WithDescription($"Verify your osu! account to get cool roles on {user.Guild.Name}!")
-            .AddField("Link", osuUser.Url)
-            .WithThumbnailUrl("https://osufriends.ovh/img/favicon.gif")
-            .WithColor(Discord.Color.Gold);
+            Title = $"Hi {user.Username}!";
+            Description = $"Verify your osu! account to get cool roles on {user.Guild.Name}!";
+            AddField("Link", osuUser.Url);
+            ThumbnailUrl = "https://osufriends.ovh/img/favicon.gif";
+            Color = EmbedColors.Important;
         }
     }
 }

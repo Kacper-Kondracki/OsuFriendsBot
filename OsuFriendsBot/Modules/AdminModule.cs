@@ -1,10 +1,14 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
+using OsuFriendsBot.Embeds;
 using OsuFriendsBot.Osu.OsuFriendsBot.Services;
+using OsuFriendsBot.RuntimeResults;
 using OsuFriendsDb.Models;
 using OsuFriendsDb.Services;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,17 +35,17 @@ namespace OsuFriendsBot.Modules
         // Server settings
         [Command("prefix")]
         [Summary("Set custom bot prefix")]
-        public async Task SetPrefixCmd([Summary("If not specified, restores default prefix")] string prefix = null)
+        public async Task<RuntimeResult> SetPrefixCmd([Summary("If not specified, restores default prefix")] string prefix = null)
         {
             if (!string.IsNullOrEmpty(prefix) && prefix.Length > 32)
             {
-                await ReplyAsync("Prefix can't be longer than 32 characters!"); // TODO: Use Post-Execution handler
-                return;
+                return PrefixResult.FromError("Prefix can't be longer than 32 characters");
             }
             GuildSettings settings = _guildSettingsCache.GetOrAddGuildSettings(Context.Guild.Id);
             settings.Prefix = prefix;
             _guildSettingsCache.UpsertGuildSettings(settings);
             await ReplyAsync($"Current prefix: {prefix ?? _config.Prefix}");
+            return PrefixResult.FromSuccess();
         }
 
         // Osu
@@ -49,79 +53,36 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows osu! roles")]
         public async Task RolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> roles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name);
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle("Configured Roles:")
-                .WithColor(Color.Blue);
-
-            if (roles.Any())
-            {
-                embedBuilder.WithDescription(string.Join('\n', roles));
-            }
-            else
-            {
-                embedBuilder.WithDescription("None");
-            }
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            List<string> roles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name).ToList();
+            await ReplyAsync(embed: new RolesEmbed("Configured Roles:", roles).Build());
         }
 
         [Command("missingroles")]
         [Summary("Shows missing roles")]
         public async Task MissingRolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
-            System.Collections.Generic.List<string> allRoles = OsuRoles.AllRoles();
-            System.Collections.Generic.IEnumerable<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase);
+            IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
+            List<string> allRoles = OsuRoles.AllRoles();
 
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"Missing roles:")
-                .WithColor(Color.Blue);
-
-            if (missingRoles.Any())
-            {
-                embedBuilder.WithDescription(string.Join('\n', missingRoles));
-            }
-            else
-            {
-                embedBuilder.WithDescription("None");
-            }
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            List<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase).ToList();
+            await ReplyAsync(embed: new RolesEmbed("Missing Roles:", missingRoles).Build());
         }
 
         [Command("createmissingroles", RunMode = RunMode.Async)]
         [Summary("Creates missing roles")]
         public async Task CreateMissingRolesCmd()
         {
-            System.Collections.Generic.IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
-            System.Collections.Generic.List<string> allRoles = OsuRoles.AllRoles();
-            System.Collections.Generic.IEnumerable<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase);
+            IEnumerable<string> allGuildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name.ToUpperInvariant());
+            List<string> allRoles = OsuRoles.AllRoles();
+
+            List<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase).ToList();
 
             foreach (string role in missingRoles)
             {
                 await Context.Guild.CreateRoleAsync(role, isMentionable: false);
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"Created roles:")
-                .WithColor(Color.Blue);
-
-            if (missingRoles.Any())
-            {
-                embedBuilder.WithDescription(string.Join('\n', missingRoles));
-            }
-            else
-            {
-                embedBuilder.WithDescription("None");
-            }
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            await ReplyAsync(embed: new RolesEmbed("Created Roles:", missingRoles).Build());
         }
 
         [Command("deletebotroles", RunMode = RunMode.Async)]
@@ -129,29 +90,14 @@ namespace OsuFriendsBot.Modules
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task DeleteBotRolesCmd()
         {
-            System.Collections.Generic.List<Discord.WebSocket.SocketRole> guildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles);
+            List<SocketRole> guildRoles = OsuRoles.FindAllRoles(Context.Guild.Roles);
 
-            foreach (Discord.WebSocket.SocketRole role in guildRoles)
+            foreach (SocketRole role in guildRoles)
             {
                 await role.DeleteAsync();
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"Deleted roles:")
-                .WithColor(Color.Blue);
-
-            if (guildRoles.Any())
-            {
-                embedBuilder.WithDescription(string.Join('\n', guildRoles));
-            }
-            else
-            {
-                embedBuilder.WithDescription("None");
-            }
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            await ReplyAsync(embed: new RolesEmbed("Created Roles:", guildRoles.Select(role => role.Name).ToList()).Build());
         }
     }
 }

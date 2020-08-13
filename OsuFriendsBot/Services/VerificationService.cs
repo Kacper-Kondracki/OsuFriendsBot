@@ -39,7 +39,7 @@ namespace OsuFriendsBot.Services
 
         public async Task UserJoinedAsync(SocketGuildUser user)
         {
-            /*_ = Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 RuntimeResult result = await VerifyAsync(user);
 
@@ -63,7 +63,7 @@ namespace OsuFriendsBot.Services
                         throw;
                     }
                 }
-            });*/
+            });
             await Task.CompletedTask;
         }
 
@@ -163,7 +163,7 @@ namespace OsuFriendsBot.Services
             while (true)
             {
                 OsuUser osuUser = _osuFriends.CreateUser();
-                var status = await osuUser.GetStatusAsync();
+                Status? status = await osuUser.GetStatusAsync();
                 _logger.LogTrace("Verification Status: {status}", status);
                 if (status == Status.Invalid)
                 {
@@ -175,7 +175,7 @@ namespace OsuFriendsBot.Services
         private async Task<OsuUser> CreateOsuUserFromUserDataAsync(UserData userData)
         {
             OsuUser osuUser = _osuFriends.CreateUser(userData.OsuFriendsKey);
-            var status = await osuUser.GetStatusAsync();
+            Status? status = await osuUser.GetStatusAsync();
             _logger.LogTrace("OsuDb Status: {status}", status);
             if (status != Status.Completed)
             {

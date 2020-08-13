@@ -1,7 +1,9 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
+using Discord.Rest;
 using Microsoft.Extensions.Logging;
+using OsuFriendsBot.Embeds;
 using OsuFriendsDb.Services;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,32 +31,27 @@ namespace OsuFriendsBot.Modules
         [Summary("Shows all commands")]
         public async Task HelpCmd()
         {
-            System.Collections.Generic.List<ModuleInfo> modules = _commands.Modules.OrderBy(x => x.Name).ToList();
+            List<ModuleInfo> modules = _commands.Modules.OrderBy(x => x.Name).ToList();
+            string prefix = Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix;
             foreach (ModuleInfo module in modules)
             {
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.WithTitle(module.Name).WithDescription(module.Summary ?? "No summary").WithColor(Color.Blue);
-                System.Collections.Generic.IReadOnlyList<CommandInfo> commands = module.Commands;
-                foreach (CommandInfo command in commands)
-                {
-                    string title = $"{string.Join(" | ", command.Aliases)}";
-                    if (command.Summary != null)
-                    {
-                        title += $" | {command.Summary}";
-                    }
-                    string text = $"{(Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix)}{command.Name}";
-                    foreach (ParameterInfo param in command.Parameters)
-                    {
-                        text += $" | {param.Name}";
-                        if (param.Summary != null)
-                        {
-                            text += $": {param.Summary}";
-                        }
-                    }
-                    text = Format.Code('\n' + text);
-                    embedBuilder.AddField(title, text);
-                }
-                await ReplyAsync(embed: embedBuilder.Build());
+                await ReplyAsync(embed: new CommandsEmbed(module, prefix).Build());
+            }
+        }
+
+        [Command("help")]
+        [Summary("Shows all commands")]
+        public async Task HelpCmd(string command)
+        {
+            SearchResult search = _commands.Search(command);
+            if (!search.IsSuccess)
+            {
+                return;
+            }
+            string prefix = Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix;
+            foreach (CommandMatch cmd in search.Commands)
+            {
+                await ReplyAsync(embed: new CommandEmbed(cmd.Command, prefix).Build());
             }
         }
 
@@ -63,31 +60,8 @@ namespace OsuFriendsBot.Modules
         [Summary("Information about bot")]
         public async Task InfoCmd()
         {
-            Discord.Rest.RestApplication app = await Context.Client.GetApplicationInfoAsync();
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"About {app.Name}")
-                .WithDescription(app.Description)
-                .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-                .AddField("Author:", app.Owner)
-                .AddField("Git repo:", @"https://github.com/AbdShullah/OsuFriendsBot")
-                .WithColor(Color.Blue);
-
-            await ReplyAsync(embed: embedBuilder.Build());
-        }
-        [Command("version")]
-        [Summary("Bot version")]
-        public async Task VersionCmd()
-        {
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle($"0.0.6")
-                .WithDescription("Current Bot Version")
-                .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-                .WithColor(Color.Blue);
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            RestApplication app = await Context.Client.GetApplicationInfoAsync();
+            await ReplyAsync(embed: new InfoEmbed(app).Build());
         }
     }
 }
