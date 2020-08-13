@@ -14,15 +14,17 @@ namespace OsuFriendsBot.Services
     {
         private readonly DiscordSocketClient _discord;
         private readonly CommandService _commands;
+        private readonly DbUserDataService _dbUserData;
         private readonly GuildSettingsCacheService _guildSettings;
         private readonly Config _config;
         private readonly IServiceProvider _services;
         private readonly ILogger<CommandHandlingService> _logger;
 
-        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, GuildSettingsCacheService guildSettings, Config config, IServiceProvider services, ILogger<CommandHandlingService> logger)
+        public CommandHandlingService(DiscordSocketClient discord, CommandService commands, DbUserDataService dbUserData, GuildSettingsCacheService guildSettings, Config config, IServiceProvider services, ILogger<CommandHandlingService> logger)
         {
             _discord = discord;
             _commands = commands;
+            _dbUserData = dbUserData;
             _guildSettings = guildSettings;
             _config = config;
             _services = services;
@@ -54,6 +56,24 @@ namespace OsuFriendsBot.Services
                 return;
             }
 
+
+            await UwuAsync(message);
+            await ProcessCommandAsync(message);
+        }
+
+        private async Task UwuAsync(SocketUserMessage message)
+        {
+            if (message.Content == "uwu") // ;)
+            {
+                var user = _dbUserData.FindById(message.Author.Id);
+                user.Uwu++;
+                _dbUserData.Upsert(user);
+                await message.Channel.SendMessageAsync("What's This?");
+            }
+        }
+
+        private async Task ProcessCommandAsync(SocketUserMessage message)
+        {
             // This value holds the offset where the prefix ends
             int argPos = 0;
             // Perform prefix check. You may want to replace this with

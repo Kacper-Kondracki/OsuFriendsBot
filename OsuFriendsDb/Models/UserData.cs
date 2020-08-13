@@ -13,5 +13,6 @@ namespace OsuFriendsDb.Models
         public int? Taiko { get; set; }
         public int? Ctb { get; set; }
         public int? Mania { get; set; }
+        public int Uwu { get; set; }
     }
 }

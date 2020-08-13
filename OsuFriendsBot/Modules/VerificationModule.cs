@@ -25,7 +25,7 @@ namespace OsuFriendsBot.Modules
         [Summary("Verify your osu! account or refresh your roles")]
         public async Task<RuntimeResult> VerifyCmd()
         {
-            return await _verification.VerifyAsync(Context.User as SocketGuildUser);
+            return await _verification.VerifyAsync(Context.User as SocketGuildUser, Context);
         }
     }
 }

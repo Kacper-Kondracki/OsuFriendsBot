@@ -8,7 +8,7 @@ namespace OsuFriendsApi.Entities
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class OsuUserDetails
     {
-        public OsuUserDetails(long id, string username, Uri avatar, int? std, int? mania, int? taiko, int? ctb, List<Playstyle> playstyle)
+        public OsuUserDetails(long id, string username, Uri avatar, int? std, int? mania, int? taiko, int? ctb, List<Playstyle> playstyle, string last)
         {
             Id = id;
             Username = username;
@@ -18,6 +18,7 @@ namespace OsuFriendsApi.Entities
             Taiko = taiko;
             Ctb = ctb;
             Playstyle = playstyle;
+            Last = last;
         }
 
         public long Id { get; }
@@ -28,5 +29,6 @@ namespace OsuFriendsApi.Entities
         public int? Ctb { get; }
         public int? Mania { get; }
         public List<Playstyle> Playstyle { get; }
+        public string Last { get; }
     }
 }

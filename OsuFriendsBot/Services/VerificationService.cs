@@ -67,7 +67,7 @@ namespace OsuFriendsBot.Services
             await Task.CompletedTask;
         }
 
-        public async Task<RuntimeResult> VerifyAsync(SocketGuildUser user)
+        public async Task<RuntimeResult> VerifyAsync(SocketGuildUser user, SocketCommandContext context = null)
         {
             _logger.LogTrace("Verifying user: {username}", user.Username);
 
@@ -92,7 +92,6 @@ namespace OsuFriendsBot.Services
                 {
                     // If user doesn't exist in db
                     osuUser = await CreateOsuUserAsync();
-
                     await user.SendMessageAsync(embed: new VerifyEmbed(user, osuUser).Build());
 
                     // Retry
@@ -107,7 +106,7 @@ namespace OsuFriendsBot.Services
                 }
                 // Success for both
                 (List<SocketRole> grantedRoles, OsuUserDetails osuUserDetails) = await GrantUserRolesAsync(user, osuUser);
-                await user.SendMessageAsync(embed: new GrantedRolesEmbed(user, grantedRoles, osuUserDetails, dbUser).Build());
+                await SendEmbedMsg(user, context, embed: new GrantedRolesEmbed(user, grantedRoles, osuUserDetails, dbUser).Build());
                 dbUser.Std = osuUserDetails.Std;
                 dbUser.Taiko = osuUserDetails.Taiko;
                 dbUser.Ctb = osuUserDetails.Ctb;
@@ -199,6 +198,18 @@ namespace OsuFriendsBot.Services
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
             return success;
+        }
+
+        private async Task SendEmbedMsg(SocketGuildUser user, SocketCommandContext context, Embed embed)
+        {
+            if (context != null)
+            {
+                await context.Channel.SendMessageAsync(embed: embed);
+            }
+            else
+            {
+                await user.SendMessageAsync(embed: embed);
+            }
         }
 
         private async Task<(List<SocketRole>, OsuUserDetails)> GrantUserRolesAsync(SocketGuildUser user, OsuUser osuUser)
