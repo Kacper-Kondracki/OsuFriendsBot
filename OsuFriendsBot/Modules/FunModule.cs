@@ -1,8 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
-using OsuFriendsBot.Services;
 using OsuFriendsDb.Services;
 using System.Threading.Tasks;
 
@@ -21,11 +19,12 @@ namespace OsuFriendsBot.Modules
             _dbUserData = dbUserData;
             _logger = logger;
         }
+
         [Command("uwu")]
         [Summary("UwU")]
         public async Task UwuCmd()
         {
-            var count = _dbUserData.FindById(Context.User.Id).Uwu;
+            int count = _dbUserData.FindById(Context.User.Id).Uwu;
             await ReplyAsync($"{Format.Bold("What's this?")} | {Context.User.Username}, you've {Format.Bold("uwu")}'d {Format.Code(count.ToString())} times");
         }
     }

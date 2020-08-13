@@ -3,7 +3,6 @@ using Discord.WebSocket;
 using OsuFriendsApi.Entities;
 using OsuFriendsBot.Osu;
 using OsuFriendsDb.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 

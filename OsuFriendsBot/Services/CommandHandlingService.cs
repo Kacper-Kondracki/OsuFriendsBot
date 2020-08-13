@@ -56,7 +56,6 @@ namespace OsuFriendsBot.Services
                 return;
             }
 
-
             await UwuAsync(message);
             await ProcessCommandAsync(message);
         }
@@ -65,7 +64,7 @@ namespace OsuFriendsBot.Services
         {
             if (message.Content == "uwu") // ;)
             {
-                var user = _dbUserData.FindById(message.Author.Id);
+                OsuFriendsDb.Models.UserData user = _dbUserData.FindById(message.Author.Id);
                 user.Uwu++;
                 _dbUserData.Upsert(user);
                 await message.Channel.SendMessageAsync("What's This?");
