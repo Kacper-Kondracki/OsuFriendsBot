@@ -17,7 +17,7 @@ namespace OsuFriendsApi.Entities
             Mania = mania;
             Taiko = taiko;
             Ctb = ctb;
-            Playstyle = playstyle;
+            Playstyle = playstyle ?? new List<Playstyle>();
             Last = last;
         }
 

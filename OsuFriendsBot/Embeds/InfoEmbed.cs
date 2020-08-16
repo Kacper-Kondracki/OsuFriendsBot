@@ -12,7 +12,7 @@ namespace OsuFriendsBot.Embeds
             ThumbnailUrl = app.IconUrl;
             AddField("Author:", app.Owner);
             AddField("Git repo:", @"https://github.com/AbdShullah/OsuFriendsBot");
-            AddField("Bot Version:", "0.0.7");
+            AddField("Bot Version:", "0.0.8");
             Color = EmbedColors.Info;
         }
     }
