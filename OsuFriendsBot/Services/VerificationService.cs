@@ -186,7 +186,7 @@ namespace OsuFriendsBot.Services
         private async Task<bool> WaitForVerificationStatusAsync(OsuUser osuUser)
         {
             bool success = false;
-            for (int retry = 0; retry < 30; retry++)
+            for (int retry = 0; retry < 60; retry++)
             {
                 Status? status = await osuUser.GetStatusAsync();
                 _logger.LogTrace("Verification Status: {@status}", status);

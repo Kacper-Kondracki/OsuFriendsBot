@@ -1,4 +1,6 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
+using Discord.Net;
 using Discord.Rest;
 using Microsoft.Extensions.Logging;
 using OsuFriendsBot.Embeds;
@@ -29,14 +31,28 @@ namespace OsuFriendsBot.Modules
 
         [Command("help")]
         [Summary("Shows all commands")]
-        public async Task HelpCmd()
+        public async Task<RuntimeResult> HelpCmd()
         {
             List<ModuleInfo> modules = _commands.Modules.OrderBy(x => x.Name).ToList();
             string prefix = Context.Guild != null ? _guildSettings.GetOrAddGuildSettings(Context.Guild.Id).Prefix ?? _config.Prefix : _config.Prefix;
-            foreach (ModuleInfo module in modules)
+            try
             {
-                await ReplyAsync(embed: new CommandsEmbed(module, prefix).Build());
+                foreach (ModuleInfo module in modules)
+                {
+                    await Context.User.SendMessageAsync(embed: new CommandsEmbed(module, prefix).Build());
+                }
             }
+            catch (HttpException e)
+            {
+                switch (e.DiscordCode)
+                {
+                    case 50007:
+                        return RuntimeResults.HelpResult.FromError("Sorry, I can't send direct message to you, please check if you block DMs via server");
+                    default:
+                        throw;
+                }
+            }
+            return RuntimeResults.HelpResult.FromSuccess();
         }
 
         [Command("help")]
