@@ -92,6 +92,10 @@ namespace OsuFriendsBot.Services
                 {
                     // If user doesn't exist in db
                     osuUser = await CreateOsuUserAsync();
+                    if (osuUser == null)
+                    {
+                        return new VerificationUserIdError();
+                    }
                     await user.SendMessageAsync(embed: new VerifyEmbed(user, osuUser).Build());
 
                     // Retry
@@ -159,16 +163,18 @@ namespace OsuFriendsBot.Services
 
         private async Task<OsuUser> CreateOsuUserAsync()
         {
-            while (true)
+            for (int tries = 0; tries < 30; tries++)
             {
                 OsuUser osuUser = _osuFriends.CreateUser();
                 Status? status = await osuUser.GetStatusAsync();
                 _logger.LogTrace("Verification Status: {status}", status);
+
                 if (status == Status.Invalid)
                 {
                     return osuUser;
                 }
             }
+            return null;
         }
 
         private async Task<OsuUser> CreateOsuUserFromUserDataAsync(UserData userData)
