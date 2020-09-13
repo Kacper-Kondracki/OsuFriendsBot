@@ -4,6 +4,7 @@ using Discord.Net;
 using Discord.Rest;
 using Microsoft.Extensions.Logging;
 using OsuFriendsBot.Embeds;
+using OsuFriendsBot.RuntimeResults;
 using OsuFriendsDb.Services;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace OsuFriendsBot.Modules
         private readonly GuildSettingsCacheService _guildSettings;
         private readonly CommandService _commands;
         private readonly Config _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<InfoModule> _logger;
 
         public InfoModule(GuildSettingsCacheService guildSettings, CommandService commands, Config config, ILogger<InfoModule> logger)
         {
@@ -47,12 +48,12 @@ namespace OsuFriendsBot.Modules
                 switch (e.DiscordCode)
                 {
                     case 50007:
-                        return RuntimeResults.HelpResult.FromError("Sorry, I can't send direct message to you, please check if you block DMs via server");
+                        return new DirectMessageError();
                     default:
                         throw;
                 }
             }
-            return RuntimeResults.HelpResult.FromSuccess();
+            return new SuccessResult();
         }
 
         [Command("help")]

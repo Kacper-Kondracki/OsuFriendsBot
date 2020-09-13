@@ -6,9 +6,17 @@ namespace OsuFriendsBot.Embeds
 {
     public class RolesEmbed : EmbedBuilder
     {
-        public RolesEmbed(string title, List<string> roles)
+        public RolesEmbed(RoleEmbedType type, List<string> roles)
         {
-            Title = title;
+            Title = type switch
+            {
+                RoleEmbedType.Created => "Created Roles:",
+                RoleEmbedType.Configured => "Configured Roles:",
+                RoleEmbedType.Missing => "Missing Roles:",
+                RoleEmbedType.Deleted => "Deleted Roles:",
+                _ => throw new System.NotImplementedException()
+            };
+
             Color = EmbedColors.Info;
 
             if (roles.Any())
@@ -20,5 +28,12 @@ namespace OsuFriendsBot.Embeds
                 Description = "None";
             }
         }
+    }
+    public enum RoleEmbedType
+    {
+        Created,
+        Configured,
+        Missing,
+        Deleted
     }
 }

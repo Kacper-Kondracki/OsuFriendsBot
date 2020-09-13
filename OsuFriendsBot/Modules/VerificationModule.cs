@@ -12,7 +12,7 @@ namespace OsuFriendsBot.Modules
     public class VerificationModule : ModuleBase<SocketCommandContext>
     {
         private readonly VerificationService _verification;
-        private readonly ILogger _logger;
+        private readonly ILogger<VerificationModule> _logger;
 
         public VerificationModule(VerificationService verification, ILogger<VerificationModule> logger)
         {

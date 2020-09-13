@@ -12,7 +12,7 @@ namespace OsuFriendsBot.Modules
     public class FunModule : ModuleBase<SocketCommandContext>
     {
         private readonly DbUserDataService _dbUserData;
-        private readonly ILogger _logger;
+        private readonly ILogger<FunModule> _logger;
 
         public FunModule(DbUserDataService dbUserData, ILogger<FunModule> logger)
         {

@@ -16,7 +16,7 @@ namespace OsuFriendsBot.Services
         private readonly CommandHandlingService _commandHandler;
         private readonly IServiceProvider _services;
         private readonly Config _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<StartupService> _logger;
 
         // DiscordSocketClient, CommandService, and IConfigurationRoot are injected automatically from the IServiceProvider
         public StartupService(

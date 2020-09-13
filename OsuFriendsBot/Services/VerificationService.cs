@@ -22,7 +22,7 @@ namespace OsuFriendsBot.Services
         private readonly DbUserDataService _dbUserData;
         private readonly DiscordSocketClient _discord;
         private readonly OsuFriendsClient _osuFriends;
-        private readonly ILogger _logger;
+        private readonly ILogger<VerificationService> _logger;
 
         private readonly HashSet<ulong> verifyingUsers = new HashSet<ulong>();
         private static readonly object verifyingUsersLock = new object();
@@ -76,7 +76,7 @@ namespace OsuFriendsBot.Services
                 bool isVeryfying = AddVerifyingUser(user);
                 if (isVeryfying)
                 {
-                    return VerificationResult.FromError("Complete your first verification before starting next one");
+                    return new VerificationLockError();
                 }
                 UserData dbUser = _dbUserData.FindById(user.Id);
                 _logger.LogTrace("DbUser : {@dbUser} | Id : {@user} | Username: {@username}", dbUser, user.Id, user.Username);
@@ -99,7 +99,7 @@ namespace OsuFriendsBot.Services
                     if (!success)
                     {
                         RemoveVerifyingUser(user);
-                        return VerificationResult.FromError($"Verification failed because it timeouted! Try again with 'verify' command on {user.Guild.Name}");
+                        return new VerificationTimeoutError(user.Guild);
                     }
                     // Verification Success
                     dbUser.OsuFriendsKey = osuUser.Key;
@@ -120,7 +120,7 @@ namespace OsuFriendsBot.Services
                 switch (e.DiscordCode)
                 {
                     case 50007:
-                        return VerificationResult.FromError("Sorry, I can't send direct message to you, please check if you block DMs via server");
+                        return new DirectMessageError();
 
                     default:
                         break;
@@ -133,7 +133,7 @@ namespace OsuFriendsBot.Services
                 throw;
             }
             RemoveVerifyingUser(user);
-            return VerificationResult.FromSuccess();
+            return new SuccessResult();
         }
 
         private bool AddVerifyingUser(SocketGuildUser user)

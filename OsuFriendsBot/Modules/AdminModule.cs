@@ -23,7 +23,7 @@ namespace OsuFriendsBot.Modules
     {
         private readonly GuildSettingsCacheService _guildSettingsCache;
         private readonly Config _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<AdminModule> _logger;
 
         public AdminModule(GuildSettingsCacheService guildSettingsCache, Config config, ILogger<AdminModule> logger)
         {
@@ -39,13 +39,13 @@ namespace OsuFriendsBot.Modules
         {
             if (!string.IsNullOrEmpty(prefix) && prefix.Length > 32)
             {
-                return PrefixResult.FromError("Prefix can't be longer than 32 characters");
+                return new PrefixLengthError();
             }
             GuildSettings settings = _guildSettingsCache.GetOrAddGuildSettings(Context.Guild.Id);
             settings.Prefix = prefix;
             _guildSettingsCache.UpsertGuildSettings(settings);
             await ReplyAsync($"Current prefix: {prefix ?? _config.Prefix}");
-            return PrefixResult.FromSuccess();
+            return new SuccessResult();
         }
 
         // Osu
@@ -54,7 +54,7 @@ namespace OsuFriendsBot.Modules
         public async Task RolesCmd()
         {
             List<string> roles = OsuRoles.FindAllRoles(Context.Guild.Roles).Select(role => role.Name).ToList();
-            await ReplyAsync(embed: new RolesEmbed("Configured Roles:", roles).Build());
+            await ReplyAsync(embed: new RolesEmbed(RoleEmbedType.Configured, roles).Build());
         }
 
         [Command("missingroles")]
@@ -65,7 +65,7 @@ namespace OsuFriendsBot.Modules
             List<string> allRoles = OsuRoles.AllRoles();
 
             List<string> missingRoles = allRoles.Except(allGuildRoles, StringComparer.InvariantCultureIgnoreCase).ToList();
-            await ReplyAsync(embed: new RolesEmbed("Missing Roles:", missingRoles).Build());
+            await ReplyAsync(embed: new RolesEmbed(RoleEmbedType.Missing, missingRoles).Build());
         }
 
         [Command("createmissingroles", RunMode = RunMode.Async)]
@@ -82,7 +82,7 @@ namespace OsuFriendsBot.Modules
                 await Context.Guild.CreateRoleAsync(role, isMentionable: false);
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
-            await ReplyAsync(embed: new RolesEmbed("Created Roles:", missingRoles).Build());
+            await ReplyAsync(embed: new RolesEmbed(RoleEmbedType.Created, missingRoles).Build());
         }
 
         [Command("deletebotroles", RunMode = RunMode.Async)]
@@ -97,7 +97,7 @@ namespace OsuFriendsBot.Modules
                 await role.DeleteAsync();
                 await Task.Delay(TimeSpan.FromMilliseconds(150));
             }
-            await ReplyAsync(embed: new RolesEmbed("Created Roles:", guildRoles.Select(role => role.Name).ToList()).Build());
+            await ReplyAsync(embed: new RolesEmbed(RoleEmbedType.Deleted, guildRoles.Select(role => role.Name).ToList()).Build());
         }
     }
 }

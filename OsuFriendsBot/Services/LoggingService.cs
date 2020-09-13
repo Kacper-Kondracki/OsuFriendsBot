@@ -10,7 +10,7 @@ namespace OsuFriendsBot.Services
     {
         private readonly DiscordSocketClient _discord;
         private readonly CommandService _commands;
-        private readonly ILogger _logger;
+        private readonly ILogger<LoggingService> _logger;
 
         // DiscordSocketClient and CommandService are injected automatically from the IServiceProvider
         public LoggingService(DiscordSocketClient discord, CommandService commands, ILogger<LoggingService> logger)
