@@ -105,7 +105,7 @@ namespace OsuFriendsApi
 
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["secret"] = _token;
-            query["party"] = 6.ToString();
+            query["party"] = party.Id.ToString();
             uriBuilder.Query = query.ToString();
 
             HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
