@@ -29,6 +29,7 @@ namespace OsuFriendsBot.Embeds
             }
         }
     }
+
     public enum RoleEmbedType
     {
         Created,

@@ -37,10 +37,10 @@ namespace OsuFriendsBot.Modules
         [Summary("party")]
         public async Task PartyCmd()
         {
-            var parties = await _osuFriends.GetPartiesAsync();
+            System.Collections.Generic.IReadOnlyCollection<OsuFriendsApi.Entities.Party> parties = await _osuFriends.GetPartiesAsync();
             await ReplyAsync(JsonConvert.SerializeObject(parties));
-            var x = (await _osuFriends.GetMappoolAsync(parties.First())).First();
-            var embedBuilder = new EmbedBuilder();
+            OsuFriendsApi.Entities.Map x = (await _osuFriends.GetMappoolAsync(parties.First())).First();
+            EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder
                 .WithTitle(x.Name)
                 .WithDescription(x.Url.ToString())
@@ -51,8 +51,6 @@ namespace OsuFriendsBot.Modules
                 .WithImageUrl(x.Image.ToString());
 
             await ReplyAsync(embed: embedBuilder.Build());
-
-
         }
     }
 }

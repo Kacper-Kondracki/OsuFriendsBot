@@ -49,6 +49,7 @@ namespace OsuFriendsBot.Modules
                 {
                     case 50007:
                         return new DirectMessageError();
+
                     default:
                         throw;
                 }
