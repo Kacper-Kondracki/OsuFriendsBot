@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using OsuFriendsApi.Entities;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace OsuFriendsApi
         private string _token;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
-        public const string url = "https://osufriends.ovh/";
+        public Uri Url { get; set; } = new Uri("https://osufriends.ovh/");
 
         public OsuFriendsClient(HttpClient httpClient, ILogger<OsuFriendsClient> logger)
         {
@@ -49,7 +48,7 @@ namespace OsuFriendsApi
 
         internal async Task<Status?> GetStatusAsync(OsuUser user)
         {
-            UriBuilder uriBuilder = new UriBuilder(url);
+            UriBuilder uriBuilder = new UriBuilder(Url);
             uriBuilder.Path += "status/";
 
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -67,7 +66,7 @@ namespace OsuFriendsApi
 
         internal async Task<OsuUserDetails> GetDetailsAsync(OsuUser user)
         {
-            UriBuilder uriBuilder = new UriBuilder(url);
+            UriBuilder uriBuilder = new UriBuilder(Url);
             uriBuilder.Path += "details/";
 
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -81,37 +80,6 @@ namespace OsuFriendsApi
             string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             _logger.LogTrace("Details of {key}: {details}", user.Key, content);
             return JsonConvert.DeserializeObject<OsuUserDetails>(content);
-        }
-
-        public async Task<IReadOnlyCollection<Party>> GetPartiesAsync()
-        {
-            UriBuilder uriBuilder = new UriBuilder(url);
-            uriBuilder.Path += "get_parties/";
-
-            NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["secret"] = _token;
-            uriBuilder.Query = query.ToString();
-
-            HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<IReadOnlyCollection<Party>>(content);
-        }
-
-        public async Task<IReadOnlyCollection<Map>> GetMappoolAsync(Party party)
-        {
-            UriBuilder uriBuilder = new UriBuilder(url);
-            uriBuilder.Path += "get_mappool/";
-
-            NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["secret"] = _token;
-            query["party"] = party.Id.ToString();
-            uriBuilder.Query = query.ToString();
-
-            HttpResponseMessage response = await _httpClient.GetAsync(uriBuilder.Uri).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<IReadOnlyCollection<Map>>(content);
         }
     }
 }

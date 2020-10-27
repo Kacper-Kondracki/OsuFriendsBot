@@ -1,10 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using OsuFriendsApi;
 using OsuFriendsDb.Services;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OsuFriendsBot.Modules
@@ -31,26 +29,6 @@ namespace OsuFriendsBot.Modules
         {
             int count = _dbUserData.FindById(Context.User.Id).Uwu;
             await ReplyAsync($"{Format.Bold("What's this?")} | {Context.User.Username}, you've {Format.Bold("uwu")}'d {Format.Code(count.ToString())} times");
-        }
-
-        [Command("party")]
-        [Summary("party")]
-        public async Task PartyCmd()
-        {
-            System.Collections.Generic.IReadOnlyCollection<OsuFriendsApi.Entities.Party> parties = await _osuFriends.GetPartiesAsync();
-            await ReplyAsync(JsonConvert.SerializeObject(parties));
-            OsuFriendsApi.Entities.Map x = (await _osuFriends.GetMappoolAsync(parties.First())).First();
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder
-                .WithTitle(x.Name)
-                .WithDescription(x.Url.ToString())
-                .AddField("Difficulty", x.Difficulty)
-                .AddField("Stars", x.Stars)
-                .AddField("Status", x.Status)
-                .AddField("BPM", x.Bpm)
-                .WithImageUrl(x.Image.ToString());
-
-            await ReplyAsync(embed: embedBuilder.Build());
         }
     }
 }

@@ -14,7 +14,7 @@ namespace OsuFriendsApi.Entities
         {
             Key = key ?? Guid.NewGuid();
             _client = client;
-            UriBuilder uriBuilder = new UriBuilder(OsuFriendsClient.url);
+            UriBuilder uriBuilder = new UriBuilder(client.Url);
             uriBuilder.Path += $"auth/{Key}";
             Url = uriBuilder.Uri;
         }

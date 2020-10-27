@@ -48,7 +48,13 @@ namespace OsuFriendsBot.Services
             {
                 throw new Exception("Please enter your api token into the `config.json` file found in the applications root directory.");
             }
+
             _services.GetRequiredService<OsuFriendsClient>().SetToken(_config.OsuFriendsApiToken);
+
+            if (_config.OsuFriendsApiUrl != null)
+            {
+                _services.GetRequiredService<OsuFriendsClient>().Url = _config.OsuFriendsApiUrl;
+            }
             _config.OsuFriendsApiToken = string.Empty;
 
             _logger.LogInformation("Setting Discord Bot token");
